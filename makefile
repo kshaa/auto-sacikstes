@@ -1,15 +1,18 @@
-PROG = shooter03
+PROG = autosacikstes
 CC = gcc
+OBJS = draw.o init.o input.o main.o 
+LIBS = -l SDL2 -l SDL2_image
+CFLAGS = ${LIBS} ${INCLUDES}
 
-include common.mk
+# Make actions
+all: ${PROG}
+clean:
+	rm -rf *.o $(PROG)
 
-CXXFLAGS += `sdl2-config --cflags`
-CXXFLAGS += -g -lefence
-
-LDFLAGS += -I /usr/include/SDL2/
-#LDFLAGS += `sdl2-config --libs` -lSDL2_mixer -lSDL2_image -lSDL2_ttf -lm
-LDFLAGS += `sdl2-config --libs` -lm -lSDL2_image
-
+# Compile object files
+%.o: %.c %.h
+	$(CC) -c -o $@ $< $(CFLAGS) 
+	
 # linking the program.
-$(PROG): $(OBJS)
-	$(CC) -o $@ $(OBJS) $(LDFLAGS)
+${PROG}: $(OBJS)
+	$(CC) -o $@ $(OBJS) $(CFLAGS)  
