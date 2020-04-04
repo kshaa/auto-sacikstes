@@ -1,53 +1,36 @@
-/*
-Copyright (C) 2015-2018 Parallel Realities
+#include "SDL2/SDL.h"
+#include "SDL2/SDL_image.h"
+#include "const.h"
+#include "main.h"
+#include "main_struct.h"
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
+void initSDL(void) {
+    int rendererFlags, windowFlags;
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    rendererFlags = SDL_RENDERER_ACCELERATED;
 
-See the GNU General Public License for more details.
+    windowFlags = SDL_WINDOW_RESIZABLE;
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        printf("Couldn't initialize SDL: %s\n", SDL_GetError());
+        exit(1);
+    }
 
-*/
+    app.window = SDL_CreateWindow(WINDOW_NAME, SDL_WINDOWPOS_UNDEFINED,
+                                  SDL_WINDOWPOS_UNDEFINED, INITIAL_SCREEN_WIDTH,
+                                  INITIAL_SCREEN_HEIGHT, windowFlags);
 
-#include "init.h"
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
 
-void initSDL(void)
-{
-	int rendererFlags, windowFlags;
+    app.renderer = SDL_CreateRenderer(app.window, -1, rendererFlags);
 
-	rendererFlags = SDL_RENDERER_ACCELERATED;
-	
-	windowFlags = SDL_WINDOW_RESIZABLE;
-
-	if (SDL_Init(SDL_INIT_VIDEO) < 0)
-	{
-		printf("Couldn't initialize SDL: %s\n", SDL_GetError());
-		exit(1);
-	}
-
-	app.window = SDL_CreateWindow("Shooter 03", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, windowFlags);
-
-	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
-
-	app.renderer = SDL_CreateRenderer(app.window, -1, rendererFlags);
-	
-	IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
+    IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
 }
 
-void cleanup(void)
-{
-	SDL_DestroyRenderer(app.renderer);
-	
-	SDL_DestroyWindow(app.window);
-	
-	SDL_Quit();
+void cleanup(void) {
+    SDL_DestroyRenderer(app.renderer);
+
+    SDL_DestroyWindow(app.window);
+
+    SDL_Quit();
 }
