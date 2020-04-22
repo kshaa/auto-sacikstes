@@ -1,7 +1,7 @@
 PROG = autosacikstes
 CC = gcc
-OBJS = draw.o init.o input.o main.o 
-LIBS = -l SDL2 -l SDL2_image
+OBJS = init.o input.o main.o scene.o state.o
+LIBS = -l SDL2
 CFLAGS = ${LIBS} ${INCLUDES}
 
 # Make actions
