@@ -9,7 +9,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include "const.h"
-#include "sockets.h"
+#include "socket.h"
 
 // Socket connections
 int serverfd = CLOSED_CONNECTION;

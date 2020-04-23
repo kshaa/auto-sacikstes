@@ -3,7 +3,6 @@
 #include <errno.h>
 #include <string.h>
 #include "../../common/protocol_messages.h"
-#include "../sockets.h"
 
 int routeError(int connfd, char * recvBuff, size_t sendBuffSize, char * sendBuff, char errorCode[2]) {
     ProtocolErrorResponse error;

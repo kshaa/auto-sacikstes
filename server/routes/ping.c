@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
-#include "../sockets.h"
 #include "../../common/protocol_messages.h"
 
 int routePing(int connfd, char * recvBuff, size_t sendBuffSize, char * sendBuff) {

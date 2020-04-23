@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "sockets.h"
+#include "socket.h"
 #include "traffic.h"
 #include <unistd.h>
 
