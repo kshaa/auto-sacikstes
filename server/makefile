@@ -1,6 +1,6 @@
 PROG = autosacikstes-server
 CC = gcc
-OBJS = main.o sockets.o traffic.o routes/ping.o routes/error.o ../common/protocol_messages.o
+OBJS = main.o socket.o traffic.o routes/ping.o routes/error.o ../common/protocol_messages.o
 CFLAGS = 
 
 # Make actions

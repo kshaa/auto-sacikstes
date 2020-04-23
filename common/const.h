@@ -1,0 +1,7 @@
+#ifndef COMMON_CONST_H
+#define COMMON_CONST_H
+
+#define COMMON_SEND_BUFF_SIZE 1024
+#define COMMON_RECV_BUFF_SIZE 1024
+
+#endif
