@@ -1,6 +1,8 @@
 #ifndef PING_H
 #define PING_H
 
-int routePing();
+#include <stdlib.h>
+
+int routePing(int connfd, char * recvBuff, size_t sendBuffSize, char * sendBuff);
 
 #endif

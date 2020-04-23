@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     int port = 5000;
     int initSuccess = initServer(address, port);
     if (!initSuccess) {
-        fprintf(stderr, "Failed to initialize server");
+        fprintf(stderr, "[server] Failed to initialize server\n");
         return 1;
     }
 
