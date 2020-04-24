@@ -6,6 +6,7 @@
 #include "scene.h"
 #include "../common/networking/translate.h"
 #include "queries/game.h"
+#include "queries/ping.h"
 
 // External getopt parameters
 extern char *optarg;
@@ -23,6 +24,7 @@ const char usageFormat[] =
     "   -h Print this help\n"
     "   -l List running games on server\n"
     "   -j Join game with ID\n\n"
+    "   -k Send keep-alive i.e. ping to server\n\n"
 
     "At least one action flag is required\n";
 
@@ -35,6 +37,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Prepare action
+    int keepAliveFlag = 0;
     int helpFlag = 0;
     int listGamesFlag = 0;
     int joinGameFlag = 0;
@@ -42,8 +45,11 @@ int main(int argc, char *argv[]) {
 
     // Parse options
     int option;
-    while ((option = getopt(argc, argv, "ha:p:lj:")) != -1) {
+    while ((option = getopt(argc, argv, "kha:p:lj:")) != -1) {
         switch (option) {
+            case 'k':
+                keepAliveFlag = 1;
+                break;
             case 'h':
                 helpFlag = 1;
                 break;
@@ -80,7 +86,7 @@ int main(int argc, char *argv[]) {
     }
 
     // At least one action is required
-    if (!(helpFlag || listGamesFlag || joinGameFlag)) {
+    if (!(keepAliveFlag || helpFlag || listGamesFlag || joinGameFlag)) {
         fprintf(stderr, "[client] At least one action is required\n");
         fprintf(stderr, usageFormat, argv[0]);
         return 1;
@@ -100,7 +106,14 @@ int main(int argc, char *argv[]) {
     }
 
     // Process the provided action
-    if (listGamesFlag) {
+    if (keepAliveFlag) {
+        int pingSuccess = ping();
+        if (pingSuccess) {
+            printf("[client] Ping successful\n");
+        } else {
+            printf("[client] Ping failed\n");
+        }
+    } else if (listGamesFlag) {
         printf("[client] Listing games\n");
         int gameCount = getGameCount();
     } else if (joinGameFlag) {
