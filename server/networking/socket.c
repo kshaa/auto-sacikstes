@@ -8,17 +8,13 @@
 #include <string.h>
 #include <sys/types.h>
 #include <fcntl.h>
-#include "const.h"
+#include "../const.h"
 #include "socket.h"
 
 // Socket connections
 int serverfd = CLOSED_CONNECTION;
 int connectionCount = 0;
 int connectionfds[MAX_CONNECTIONS];
-
-// Socket traffic
-char sendBuff[SEND_BUFF_SIZE];
-char recvBuff[RECV_BUFF_SIZE];
 
 int listenTCP(uint32_t address, int port) {
     int failurefd = -1;
@@ -51,23 +47,6 @@ int listenTCP(uint32_t address, int port) {
     fcntl(listenfd, F_SETFL, O_NONBLOCK);
 
     return listenfd;
-}
-
-int initServer(uint32_t address, int port) {
-    // Prepare network traffic buffers
-    memset(sendBuff, 0, sizeof(sendBuff)); 
-    memset(recvBuff, 0, sizeof(recvBuff)); 
-
-    // Bind and listen to TCP socket
-    serverfd = listenTCP(address, port);
-    if (DEBUG) printf("[socket] Socket is listening, fd: %d\n", serverfd);
-
-    // Mark all connections initially as closed
-    for (int i = 0; i < MAX_CONNECTIONS; i++) {
-        connectionfds[i] = CLOSED_CONNECTION;
-    }
-
-    return serverfd != -1;
 }
 
 int acceptConnections() {

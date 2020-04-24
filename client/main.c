@@ -4,7 +4,7 @@
 #include "input.h"
 #include "state.h"
 #include "scene.h"
-#include "networking/translate.h"
+#include "../common/networking/translate.h"
 #include "queries/game.h"
 
 // External getopt parameters
@@ -13,34 +13,50 @@ extern int optind;
 
 // Usage instruction
 const char usageFormat[] =
+    "Autosacikstes client\n\n"
+
     "Usage: %s [FLAGS]\n"
     "Connection flags:\n"
-    "   -p Server port\n"
-    "   -h Server IPv4 address\n"
+    "   -a Server IPv4 connection address\n"
+    "   -p Server connection port\n"
     "Action flags:\n"
+    "   -h Print this help\n"
     "   -l List running games on server\n"
-    "   -j Join game with ID\n"
+    "   -j Join game with ID\n\n"
+
     "At least one action flag is required\n";
 
 int main(int argc, char *argv[]) {
+    // Init state
+    int stateSuccess = initState();
+    if (!stateSuccess) {
+        fprintf(stderr, "[client] Failed to initialize state\n");
+        return 1;
+    }
+
     // Prepare action
+    int helpFlag = 0;
     int listGamesFlag = 0;
     int joinGameFlag = 0;
     int joinGameID = 0;
 
     // Parse options
     int option;
-    while ((option = getopt(argc, argv, "h:p:lj:")) != -1) {
+    while ((option = getopt(argc, argv, "ha:p:lj:")) != -1) {
         switch (option) {
+            case 'h':
+                helpFlag = 1;
+                break;
             case 'p':
                 server.port = atoi(optarg);
                 break;
-            case 'h':
+            case 'a':
                 strncpy(server.addressSerialized, optarg, 16);
                 server.address = translateIPAddress(server.addressSerialized);
                 if (server.address == INVALID_IP_ADDRESS) {
                     fprintf(stderr, "[client] Invalid server address provided\n");
                     fprintf(stderr, usageFormat, argv[0]);
+                    return 1;
                 }
                 break;
             case 'l':
@@ -56,19 +72,24 @@ int main(int argc, char *argv[]) {
                 return 1;
         }
     }
+    
+    // Validate port
+    if (server.port == 0) {
+        fprintf(stderr, "[server] Port must not be zero\n");
+        return 1;
+    }
 
     // At least one action is required
-    if (!(listGamesFlag || joinGameFlag)) {
+    if (!(helpFlag || listGamesFlag || joinGameFlag)) {
         fprintf(stderr, "[client] At least one action is required\n");
         fprintf(stderr, usageFormat, argv[0]);
         return 1;
     }
 
-    // Init state
-    int stateSuccess = initState();
-    if (!stateSuccess) {
-        fprintf(stderr, "[client] Failed to initialize state\n");
-        return 1;
+    // Print help
+    if (helpFlag) {
+        fprintf(stderr, usageFormat, argv[0]);
+        return 0;
     }
     
     // Connect to server
@@ -104,21 +125,21 @@ int main(int argc, char *argv[]) {
             // Send input
 
             // Physics engine
-            if (controls.up) {
-                printf("Up");
-            }
+            // if (controls.up) {
+            //     printf("Up");
+            // }
 
-            if (controls.down) {
-                printf("Down");
-            }
+            // if (controls.down) {
+            //     printf("Down");
+            // }
 
-            if (controls.left) {
-                printf("Left");
-            }
+            // if (controls.left) {
+            //     printf("Left");
+            // }
 
-            if (controls.right) {
-                printf("Right");
-            }
+            // if (controls.right) {
+            //     printf("Right");
+            // }
 
             // Scene engine
             // SDL_Rect car = malloc(sizeof(car));

@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
-#include "../../common/protocol_messages.h"
+#include "../../common/protocol/protocol_messages.h"
 
 int routePing(int connfd, char * recvBuff, size_t sendBuffSize, char * sendBuff) {
     ProtocolPongResponse pong;

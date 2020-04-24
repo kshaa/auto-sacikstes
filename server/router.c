@@ -1,6 +1,7 @@
-#include "socket.h"
-#include "../common/protocol_messages.h"
-#include "../common/fetch.h"
+#include "networking/socket.h"
+#include "../common/protocol/protocol_messages.h"
+#include "../common/networking/fetch.h"
+#include "state.h"
 #include "routes/ping.h"
 #include "routes/error.h"
 #include <errno.h>
@@ -9,59 +10,64 @@
 #include <string.h>
 #include <ctype.h>
 
-int routeTraffic(int connfd) {
+int routeTraffic(int connectionfd) {
     int success = 1;
-    // Copy route from receive buffer
-    char route[2];
-    route[0] = toupper(*(recvBuff));
-    route[1] = toupper(*(recvBuff + 1));
 
-    // Notify of incoming traffic
-    if (*recvBuff != '\0') {
-        char a = route[0];
-        char b = route[1];
-        if (a < 'A' || a > 'Z') a = '?';
-        if (b < 'A' || b > 'Z') b = '?';
-        printf("[router] Received message from %d w/ route: %c%c\n", connfd, a, b);
+    // Receive incoming message
+    errno = 0;
+    unsigned char * recvBuff = receiveMessage(connectionfd, MSG_DONTWAIT);
+    if (!recvBuff) {
+        if (errno == EWOULDBLOCK || errno == EAGAIN) {
+            // No message to receive in queue
+            // Or socket temporarily unavailable
+            // Regardless - just try later
+            return success;
+        } else {
+            // Failed to receive message
+            printf("[router] Receiving message failed: [%d] %s\n", errno, strerror(errno));
+            success = 0;
+            return success;
+        }
     }
 
-    // Skip empty messages
-    if (strcmp(route, "\0\0") == 0) {
+    if (isMessageType(recvBuff, "\0\0")) {
+        // Skip empty messages
         return success;
+    } else {
+        // Notify of real messages
+        printf("[router] Received message from %d w/ route: %s\n", connectionfd, getVolatilePrintableResponseType(recvBuff));
     }
-
-    // Clean the buffer
-    memset(sendBuff, 0, sizeof(sendBuff));
 
     // Route message to handler
-    if (strcmp(route, PROTOCOL_PING_TYPE) == 0) {
+    unsigned char sendBuff[SEND_BUFF_SIZE];
+    if (isMessageType(recvBuff, PROTOCOL_PING_TYPE)) {
         printf("[router] Routing to ping\n");
-        success = routePing(connfd, recvBuff, sizeof(sendBuff), sendBuff);
+        success = routePing(connectionfd, recvBuff, sizeof(sendBuff), sendBuff);
     } else {
-        printf("[router] Routing to error\n");
-        success = routeError(connfd, recvBuff, sizeof(sendBuff), sendBuff, PROTOCOL_ERROR_CODE_INCORRECT_TYPE);
+        printf("[router] Routing to error w/ unknown type\n");
+        success = routeError(connectionfd, recvBuff, sizeof(sendBuff), sendBuff, PROTOCOL_ERROR_CODE_INCORRECT_TYPE);
     }
 
     // Generate server internal error message if needed
     if (!success) {
-        fprintf(stderr, "[router] Message route failed for connection %d: %s\n", connfd, strerror(errno));
-        success = routeError(connfd, recvBuff, sizeof(sendBuff), sendBuff, PROTOCOL_ERROR_CODE_SERVER_IS_SAD);
+        fprintf(stderr, "[router] Message route failed for connection %d: %s\n", connectionfd, strerror(errno));
+        fprintf(stderr, "[router] Routing to error w/ internal server error\n");
+        success = routeError(connectionfd, recvBuff, sizeof(sendBuff), sendBuff, PROTOCOL_ERROR_CODE_SERVER_IS_SAD);
         
         // Even generating internal server error failed
         if (!success) {
-            fprintf(stderr, "[router] Internal server error response failed for connection %d: %s\n", connfd, strerror(errno));
+            fprintf(stderr, "[router] Internal server error response failed for connection %d: %s\n", connectionfd, strerror(errno));
             return success;
         }
     }
 
     // Send message
-    int sendResult = sendMessage(connfd, sendBuff, sizeof(sendBuff), MSG_DONTWAIT);
-    // int sendResult = send(connfd, sendBuff, sizeof(sendBuff), MSG_DONTWAIT);
-    if (sendResult == -1) {
+    int sendSuccess = sendMessage(connectionfd, sendBuff, sizeof(sendBuff), MSG_DONTWAIT);
+    if (!sendSuccess) {
         success = 0;
-        fprintf(stderr, "[router] Sending response failed for connection %d: %s\n", connfd, strerror(errno));
+        fprintf(stderr, "[router] Sending response failed for connection %d: %s\n", connectionfd, strerror(errno));
     }
-
+    
     return success;
 }
 
@@ -74,17 +80,15 @@ int handleTraffic() {
 
         // Skip closed connections
         if (connfd == CLOSED_CONNECTION) continue;
-        
-        // Listen to incoming traffic
-        memset(recvBuff, 0, sizeof(recvBuff));
-        int recvResult = recv(connfd, recvBuff, sizeof(recvBuff), MSG_DONTWAIT);
-        if (recvResult == -1 && errno != EWOULDBLOCK) {
-            // Couldn't receive result, because error occured
-            success = 0;
-            fprintf(stderr, "[traffic] Connection segment %d read error: %s\n", connfd, strerror(errno));
-        }
 
+        // Conditionally receive and process messages
         success = success && routeTraffic(connfd);
+        
+        // Kill dead connection
+        if (!success && isConnectionBroken(errno)) {
+            connectionfds[i] = CLOSED_CONNECTION;
+            fprintf(stderr, "[traffic] Connection with %d seems broken, killing it\n", connfd);
+        }
     }; 
 
     return success;

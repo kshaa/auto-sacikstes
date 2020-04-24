@@ -1,15 +1,17 @@
 PROG = autosacikstes
 CC = gcc
-OBJS = init.o input.o main.o scene.o state.o queries/game.o
-OBJS += networking/translate.o networking/socket.o
-OBJS += ../common/fetch.o ../common/protocol_messages.o
+OBJS = init.o input.o main.o scene.o state.o 
+OBJS += queries/game.o networking/socket.o
+OBJS += ../common/networking/translate.o
+OBJS += ../common/networking/fetch.o ../common/protocol/protocol_messages.o
 LIBS = -l SDL2
 CFLAGS = ${LIBS} ${INCLUDES}
 
 # Make actions
 all: ${PROG}
 clean:
-	rm -rf *.o networking/*.o ../common/*.o $(PROG)
+	find ../ -type f -name '*.o' -exec rm {} + 
+	rm -f $(PROG)
 
 # Compile object files
 %.o: %.c %.h

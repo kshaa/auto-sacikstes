@@ -1,5 +1,5 @@
-#include "../../common/protocol_messages.h"
-#include "../../common/fetch.h"
+#include "../../common/protocol/protocol_messages.h"
+#include "../../common/networking/fetch.h"
 #include "../state.h"
 
 int getGameCount() {
@@ -18,13 +18,13 @@ int getGameCount() {
     }
 
     // Process response
-    if (isResponseType(recvBuff, PROTOCOL_LIST_GAMES_TYPE)) {
+    if (isMessageType(recvBuff, PROTOCOL_LIST_GAMES_TYPE)) {
         // Request success
         ProtocolListGamesResponse * response = (ProtocolListGamesResponse *) recvBuff;
         printf("[listgames] There are %d games currently running\n", response->gameIDsCount);
     } else {
         // Request error
-        if (isResponseType(recvBuff, PROTOCOL_ERROR_TYPE)) {
+        if (isMessageType(recvBuff, PROTOCOL_ERROR_TYPE)) {
             ProtocolErrorResponse * error = (ProtocolErrorResponse *) recvBuff;
             printf("[listgames] List games failed w/ error: %s\n", getVolatileErrorMessage(error->errorCode));
         } else {

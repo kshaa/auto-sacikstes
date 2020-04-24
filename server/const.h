@@ -3,6 +3,10 @@
 
 #include "../common/const.h"
 
+// Server
+#define SERVER_DEFAULT_LISTEN_ADDRESS "0.0.0.0"
+#define SERVER_DEFAULT_LISTEN_PORT COMMON_DEFAULT_SERVER_PORT
+
 // Debug mode
 #define DEBUG COMMON_DEBUG
 

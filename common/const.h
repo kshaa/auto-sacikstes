@@ -1,7 +1,8 @@
 #ifndef COMMON_CONST_H
 #define COMMON_CONST_H
 
-// Debug mode
+// Debug modes
+#define COMMON_VERBOSE 0
 #define COMMON_DEBUG 1
 
 // Default buffer sizes

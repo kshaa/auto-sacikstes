@@ -1,22 +1,23 @@
 #include "SDL2/SDL.h"
+#include "../common/state.h"
 #include "state.h"
 
 void registerKeyUp(SDL_KeyboardEvent *event) {
     if (event->repeat == 0) {
         if (event->keysym.scancode == SDL_SCANCODE_UP) {
-            controls.up = 0;
+            controls.y = Y_NONE;
         }
 
         if (event->keysym.scancode == SDL_SCANCODE_DOWN) {
-            controls.down = 0;
+            controls.y = Y_NONE;
         }
 
         if (event->keysym.scancode == SDL_SCANCODE_LEFT) {
-            controls.left = 0;
+            controls.x = X_NONE;
         }
 
         if (event->keysym.scancode == SDL_SCANCODE_RIGHT) {
-            controls.right = 0;
+            controls.x = X_NONE;
         }
     }
 }
@@ -24,19 +25,19 @@ void registerKeyUp(SDL_KeyboardEvent *event) {
 void registerKeyDown(SDL_KeyboardEvent *event) {
     if (event->repeat == 0) {
         if (event->keysym.scancode == SDL_SCANCODE_UP) {
-            controls.up = 1;
+            controls.y = Y_UP;
         }
 
         if (event->keysym.scancode == SDL_SCANCODE_DOWN) {
-            controls.down = 1;
+            controls.y = Y_DOWN; 
         }
 
         if (event->keysym.scancode == SDL_SCANCODE_LEFT) {
-            controls.left = 1;
+            controls.x = X_LEFT;
         }
 
         if (event->keysym.scancode == SDL_SCANCODE_RIGHT) {
-            controls.right = 1;
+            controls.x = X_RIGHT;
         }
     }
 }
