@@ -21,7 +21,7 @@ enum PROTOCOL_ACTION_Y {
     Y_DOWN = -1
 };
 
-// Complex types sent in protocol
+// Types used in protocol
 typedef struct {
     float x;
     float y;

@@ -4,7 +4,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "socket.h"
-#include "traffic.h"
+#include "router.h"
+#include "const.h"
 #include <unistd.h>
 
 // External getopt parameters
@@ -18,7 +19,7 @@ int main(int argc, char *argv[])
 {
     // Configure server address
     int address = INADDR_ANY;
-    int port = 5000;
+    int port = COMMON_DEFAULT_SERVER_PORT;
 
     // Parse options
     int option;

@@ -4,12 +4,21 @@
 #include "SDL2/SDL.h"
 #include "../common/protocol_types.h"
 
-// Global state types
+// Server
+typedef struct {
+    char addressSerialized[16];
+    int address;
+    int port;
+    int fd;
+} Server;
+
+// SDL window
 typedef struct {
     SDL_Renderer *renderer;
     SDL_Window *window;
 } App;
 
+// Game field
 typedef struct {
     ProtocolFieldInfo info;
     ProtocolLine startLine;
@@ -18,18 +27,16 @@ typedef struct {
     ProtocolLine * extraLines;
 } Field;
 
-typedef struct {
-    int up;
-    int down;
-    int left;
-    int right;
-} Controls;
-
 // Global state
+Server server;
 App app;
 Field field;
-Controls controls;
+ProtocolAction controls;
 
-void initState();
+// Initialize global state
+int initState();
+
+// Initialize server connection
+int initConnection();
 
 #endif

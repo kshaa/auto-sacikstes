@@ -17,6 +17,7 @@ typedef ProtocolEmpty ProtocolPongResponse;
 // Error codes
 extern char PROTOCOL_ERROR_CODE_INCORRECT_TYPE[2];
 extern char PROTOCOL_ERROR_CODE_SERVER_IS_SAD[2];
+char * getVolatileErrorMessage(char errorCode[2]);
 
 // Error
 extern char PROTOCOL_ERROR_TYPE[2];
@@ -24,5 +25,14 @@ typedef struct {
     char type[2];
     char errorCode[2];
 } ProtocolErrorResponse;
+
+// List games
+extern char PROTOCOL_LIST_GAMES_TYPE[2];
+typedef ProtocolEmpty ProtocolListGamesRequest;
+typedef struct {
+    char type[2];
+    int gameIDsCount;
+    int * gameIDs;
+} ProtocolListGamesResponse;
 
 #endif

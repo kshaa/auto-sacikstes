@@ -1,5 +1,6 @@
 #include "socket.h"
 #include "../common/protocol_messages.h"
+#include "../common/fetch.h"
 #include "routes/ping.h"
 #include "routes/error.h"
 #include <errno.h>
@@ -33,7 +34,7 @@ int routeTraffic(int connfd) {
     memset(sendBuff, 0, sizeof(sendBuff));
 
     // Route message to handler
-    if (strcmp(route, "PI") == 0) {
+    if (strcmp(route, PROTOCOL_PING_TYPE) == 0) {
         printf("[router] Routing to ping\n");
         success = routePing(connfd, recvBuff, sizeof(sendBuff), sendBuff);
     } else {
@@ -54,7 +55,8 @@ int routeTraffic(int connfd) {
     }
 
     // Send message
-    int sendResult = send(connfd, sendBuff, sizeof(sendBuff), MSG_DONTWAIT);
+    int sendResult = sendMessage(connfd, sendBuff, sizeof(sendBuff), MSG_DONTWAIT);
+    // int sendResult = send(connfd, sendBuff, sizeof(sendBuff), MSG_DONTWAIT);
     if (sendResult == -1) {
         success = 0;
         fprintf(stderr, "[router] Sending response failed for connection %d: %s\n", connfd, strerror(errno));
