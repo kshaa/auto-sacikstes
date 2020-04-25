@@ -116,6 +116,7 @@ int main(int argc, char *argv[]) {
     // Input parameters
     char inputGameName[PROTOCOL_MAX_GAME_NAME];
     char inputPlayerName[PROTOCOL_MAX_PLAYER_NAME];
+    int inputFieldID = 0;
 
     // Parse options
     int option;
@@ -204,16 +205,37 @@ int main(int argc, char *argv[]) {
             printf("[client] Ping failed\n");
         }
     } else if (listGamesFlag) {
-        int gameCount = getGameCount();
-        printf("[client] Currently there are %d games running\n", gameCount);
+        ProtocolListGamesResponse gameIDs;
+        int gameCountSuccess = getGameIDs(&gameIDs, 1);
+        if (!gameCountSuccess) {
+            fprintf(stderr, "[client] Failed to list game ids\n");
+            return 1;
+        }
+        gameIDs.gameIDs = malloc(sizeof(int) * gameIDs.gameIDsCount);
+        int gameIDsSuccess = getGameIDs(&gameIDs, 0);
+        if (!gameIDsSuccess) {
+            fprintf(stderr, "[client] Failed to list game ids\n");
+            return 1;
+        }
+        printf("[client] Currently there are %d games running\n", gameIDs.gameIDsCount);
+        for (int i = 0; i < gameIDs.gameIDsCount; i++) {
+            printf("[client] Game w/ ID %d\n", gameIDs.gameIDs[i]);
+        }
+        free(gameIDs.gameIDs);
     } else if (createGameFlag) {
         printf("[client] Creating game!\n");
-        GameCreationResult result = createGame(inputGameName, inputPlayerName, 0);
-        if (!result.success) {
+        ProtocolCreateGameResponse createGameResponse;
+        int createGameSuccess = createGame(&createGameResponse, inputGameName, inputPlayerName, inputFieldID);
+        if (!createGameSuccess) {
             fprintf(stderr, "[client] Failed to create game\n");
             return 1;
         }
-        printf("[client] Created game! Game ID: %d, player ID: %d, player password: %s\n", result.gameID, result.playerID, result.playerPassword);
+        printf(
+            "[client] Created game! Game ID: %d, player ID: %d, player password: %s\n",
+            createGameResponse.gameID,
+            createGameResponse.playerID,
+            createGameResponse.playerPassword
+        );
         runGame();
     } else if (joinGameFlag) {
         printf("[client] Joining game w/ ID: %d\n", joinGameID);

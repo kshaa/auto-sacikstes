@@ -8,17 +8,19 @@
 #include "../logic/lobby.h"
 
 int routeGameList(int connfd, char * recvBuff, size_t sendBuffSize, char * sendBuff) {
-    int gamesCount = getGameCount();
-    int canSend = sizeof(ProtocolListGamesResponse) + sizeof(int) * gamesCount <= sendBuffSize;
-    if (!canSend) {
-        return 0;
-    }
-
     // Generate response
     ProtocolListGamesResponse response;
     strncpy(response.type, PROTOCOL_LIST_GAMES_TYPE, sizeof(PROTOCOL_LIST_GAMES_TYPE));
+    response.gameIDs = malloc(sizeof(int) * getGameCount());
+    int gamesCount = 0;
+    for (int i = 0; i < MAX_GAMES; i++) {
+        if (games[i].created) {
+            response.gameIDs[gamesCount] = i;
+            gamesCount++;
+        }
+    }
     response.gameIDsCount = gamesCount;
-    response.gameIDs = malloc(sizeof(int) * gamesCount);
+
     // Serialize it
     serializeProtocolListGamesResponse(&response, sendBuff, sendBuffSize);
 

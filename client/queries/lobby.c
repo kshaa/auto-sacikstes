@@ -4,7 +4,8 @@
 #include "../../common/networking/fetch.h"
 #include "../const.h"
 
-int getGameCount() {
+int getGameIDs(ProtocolListGamesResponse * buff, int copyOnlyCount) {
+    int success = 1;
     // Use connection from global client state
     int connectionfd = server.fd;
 
@@ -16,14 +17,21 @@ int getGameCount() {
     unsigned char * recvBuff = fetch(connectionfd, &request, sizeof(ProtocolListGamesRequest));
     if (!recvBuff) {
         if (DEBUG) printf("[listgames] List games request failed\n");
-        return -1;
+        success = 0;
+        return success;
     }
 
     // Process response
     printf("[listgames] Received: %s\n", getVolatilePrintableResponseType(recvBuff));
     if (isMessageType(recvBuff, PROTOCOL_LIST_GAMES_TYPE)) {
         // Request success
-        return getProtocolListGamesResponseCount(recvBuff, RECV_BUFF_SIZE);
+        int gameCount = getProtocolListGamesResponseCount(recvBuff, RECV_BUFF_SIZE);
+        if (copyOnlyCount) {
+            buff->gameIDsCount = gameCount;
+        } else {
+            unserializeProtocolListGamesResponse(recvBuff, RECV_BUFF_SIZE, buff);
+        }
+        return success;
     } else {
         // Request error
         if (isMessageType(recvBuff, PROTOCOL_ERROR_TYPE)) {
@@ -32,14 +40,13 @@ int getGameCount() {
         } else {
             if (DEBUG) printf("[listgames] List games failed w/ unknown error\n");
         }
-
-        return -1;
+        success = 0;
+        return success;
     }
 }
 
-GameCreationResult createGame(char * gameName, char * playerName, int fieldID) {
-    GameCreationResult result;
-    result.success = 1;
+int createGame(ProtocolCreateGameResponse * buff, char * gameName, char * playerName, int fieldID) {
+    int success = 1;
 
     // Use connection from global client state
     int connectionfd = server.fd;
@@ -56,8 +63,8 @@ GameCreationResult createGame(char * gameName, char * playerName, int fieldID) {
     unsigned char * recvBuff = fetch(connectionfd, &request, sizeof(ProtocolCreateGameRequest));
     if (!recvBuff) {
         if (DEBUG) printf("[creategame] Create game request failed\n");
-        result.success = 0;
-        return result;
+        success = 0;
+        return success;
     }
 
     // Process response
@@ -65,11 +72,8 @@ GameCreationResult createGame(char * gameName, char * playerName, int fieldID) {
     fflush(stdout);
     if (isMessageType(recvBuff, PROTOCOL_CREATE_GAME_TYPE)) {
         // Request success
-        ProtocolCreateGameResponse * response = (ProtocolCreateGameResponse *) recvBuff;
-        result.gameID = response->gameID;
-        result.playerID = response->playerID;
-        strncpy(result.playerPassword, response->playerPassword, PROTOCOL_MAX_PASSWORD_LENGTH);
-        return result;
+        memcpy(buff, recvBuff, sizeof(ProtocolCreateGameResponse));
+        return success;
     } else {
         // Request error
         if (isMessageType(recvBuff, PROTOCOL_ERROR_TYPE)) {
@@ -79,7 +83,7 @@ GameCreationResult createGame(char * gameName, char * playerName, int fieldID) {
             if (DEBUG) printf("[listgames] List games failed w/ unknown error\n");
         }
 
-        result.success = 0;
-        return result;
+        success = 0;
+        return success;
     }
 }

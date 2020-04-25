@@ -81,7 +81,9 @@ void unserializeProtocolListGamesResponse(unsigned char * buff, size_t buffSize,
     // Unserialize gameIDs
     response->gameIDs = malloc(response->gameIDsCount * sizeof(int));
     for (int i = 0; i < response->gameIDsCount; i++) {
-        response->gameIDs[i] = (((ProtocolListGamesResponse *)buff)->gameIDs)[i];
+        int * gameIDsOffset = (int *) buff + sizeof(char) * 2 + sizeof(int);
+        int * nthGameIDOffset = gameIDsOffset + sizeof(int) * i;
+        response->gameIDs[i] = *nthGameIDOffset;
     }
 }
 
