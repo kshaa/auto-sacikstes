@@ -223,6 +223,7 @@ int main(int argc, char *argv[]) {
         }
         free(gameIDs.gameIDs);
     } else if (createGameFlag) {
+        // Create game
         printf("[client] Creating game!\n");
         ProtocolCreateGameResponse createGameResponse;
         int createGameSuccess = createGame(&createGameResponse, inputGameName, inputPlayerName, inputFieldID);
@@ -236,7 +237,27 @@ int main(int argc, char *argv[]) {
             createGameResponse.playerID,
             createGameResponse.playerPassword
         );
+        // Wait until need to start
+        printf("[client] Press enter to start the game!\n");
+        getchar();
+        // Send start request
+        ProtocolStartGameResponse startGameResponse;
+        startGameResponse.playerInfos = malloc(RECV_BUFF_SIZE);
+        int startSuccess = startGame(&startGameResponse, createGameResponse.gameID, createGameResponse.playerPassword);
+        if (!startSuccess) {
+            fprintf(stderr, "[client] Failed to start game\n");
+            return 1;
+        }
+        printf(
+            "[client] Starting game! Player count: %d, Field ID: %d, field width: %d, field height: %d\n",
+            startGameResponse.playerInfoCount,
+            startGameResponse.field.id,
+            startGameResponse.field.width,
+            startGameResponse.field.height
+        );
+        // Start the game
         runGame();
+        free(startGameResponse.playerInfos);
     } else if (joinGameFlag) {
         printf("[client] Joining game w/ ID: %d\n", joinGameID);
         runGame();
