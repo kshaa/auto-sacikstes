@@ -3,6 +3,10 @@
 
 // Constants used in protocol
 #define PROTOCOL_NO_PLAYER_ID -1
+#define PROTOCOL_MAX_PASSWORD_LENGTH 10
+#define PROTOCOL_MAX_FIELD_NAME 20
+#define PROTOCOL_MAX_GAME_NAME 20
+#define PROTOCOL_MAX_PLAYER_NAME 30
 enum PROTOCOL_GAME_STATUS {
     WAITING_PLAYERS = 0,
     STARTED = 1,
@@ -29,13 +33,13 @@ typedef struct {
 
 typedef struct {
     int status;
-    char name[20];
+    char name[PROTOCOL_MAX_GAME_NAME];
     int winnerId;
-} ProtocolGame;
+} ProtocolGameInfo;
 
 typedef struct {
     int id;
-    char name[30];
+    char name[PROTOCOL_MAX_PLAYER_NAME];
     ProtocolCoordinates position;
     float angle;
     float speed;
@@ -45,7 +49,7 @@ typedef struct {
 
 typedef struct {
     int id;
-    char name[20];
+    char name[PROTOCOL_MAX_FIELD_NAME];
     int width;
     int height;
 } ProtocolFieldInfo;

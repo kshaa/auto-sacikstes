@@ -1,5 +1,7 @@
 #include "../protocol/protocol_messages.h"
 #include <string.h>
+#include "../const.h"
+#include <stdio.h>
 
 // Message types
 unsigned char volatileResponseType[2];
@@ -30,6 +32,9 @@ char PROTOCOL_PING_TYPE[] = { 'P', 'I' };
 // Pong
 char PROTOCOL_PONG_TYPE[] = { 'P', 'O' };
 
+// Error
+char PROTOCOL_ERROR_TYPE[] = { 'E', 'R' };
+
 // Error codes
 char PROTOCOL_ERROR_CODE_INCORRECT_TYPE[] = { 'I', 'T' };
 char PROTOCOL_ERROR_CODE_SERVER_IS_SAD[] = { 'S', 'S' };
@@ -52,8 +57,41 @@ char * getVolatileErrorMessage(char errorCode[2]) {
     return PROTOCOL_ERROR_MESSAGE_UNKNOWN;
 }
 
-// Error
-char PROTOCOL_ERROR_TYPE[] = { 'E', 'R' };
-
 // List games
 char PROTOCOL_LIST_GAMES_TYPE[] = { 'L', 'I' };
+int getProtocolListGamesResponseCount(void * buff, size_t buffSize) {
+    // Check if the buff is way too small
+    if (buffSize < sizeof(ProtocolListGamesResponse)) {
+        return -1;
+    }
+
+    return ((ProtocolListGamesResponse *) buff)->gameIDsCount;
+}
+
+void unserializeProtocolListGamesResponse(unsigned char * buff, size_t buffSize, ProtocolListGamesResponse * response) {
+    // Check if the buff is way too small
+    if (buffSize < sizeof(ProtocolListGamesResponse)) {
+        return;
+    }
+
+    // Unserialize type
+    strncpy(response->type, buff, 2);
+    // Unserialize gameIDsCount
+    response->gameIDsCount = ((ProtocolListGamesResponse *)buff)->gameIDsCount;
+    // Unserialize gameIDs
+    response->gameIDs = malloc(response->gameIDsCount * sizeof(int));
+    for (int i = 0; i < response->gameIDsCount; i++) {
+        response->gameIDs[i] = (((ProtocolListGamesResponse *)buff)->gameIDs)[i];
+    }
+}
+
+void serializeProtocolListGamesResponse(ProtocolListGamesResponse * response, unsigned char * buff, size_t buffSize) {
+    // Serialize type & gameIDsCount
+    memcpy(buff, response, sizeof(ProtocolListGamesResponse) - sizeof(int));
+    strncpy(((ProtocolListGamesResponse *)buff)->type, response->type, 2);
+    ((ProtocolListGamesResponse *)buff)->gameIDsCount = response->gameIDsCount;
+    // Serialize gameIDs
+    for (int i = 0; i < response->gameIDsCount; i++) {
+        ((ProtocolListGamesResponse *)buff)->gameIDs[i] = response->gameIDs[i];
+    }
+}

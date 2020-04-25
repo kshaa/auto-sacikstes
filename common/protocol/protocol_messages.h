@@ -1,6 +1,8 @@
 #ifndef PROTOCOL_MESSAGES_H
 #define PROTOCOL_MESSAGES_H
 
+#include <stdlib.h>
+
 // Message types
 unsigned char * getVolatileResponseType(void * message);
 unsigned char * getVolatilePrintableResponseType(void * message);
@@ -19,18 +21,18 @@ typedef ProtocolEmpty ProtocolPingRequest;
 extern char PROTOCOL_PONG_TYPE[2];
 typedef ProtocolEmpty ProtocolPongResponse;
 
-// Error codes
-extern char PROTOCOL_ERROR_CODE_INCORRECT_TYPE[2];
-extern char PROTOCOL_ERROR_CODE_SERVER_IS_SAD[2];
-int isErrorCode(char * a, char * b);
-char * getVolatileErrorMessage(char errorCode[2]);
-
 // Error
 extern char PROTOCOL_ERROR_TYPE[2];
 typedef struct {
     char type[2];
     char errorCode[2];
 } ProtocolErrorResponse;
+
+// Error codes
+extern char PROTOCOL_ERROR_CODE_INCORRECT_TYPE[2];
+extern char PROTOCOL_ERROR_CODE_SERVER_IS_SAD[2];
+int isErrorCode(char * a, char * b);
+char * getVolatileErrorMessage(char errorCode[2]);
 
 // List games
 extern char PROTOCOL_LIST_GAMES_TYPE[2];
@@ -40,5 +42,8 @@ typedef struct {
     int gameIDsCount;
     int * gameIDs;
 } ProtocolListGamesResponse;
+int getProtocolListGamesResponseCount(void * buff, size_t buffSize);
+void unserializeProtocolListGamesResponse(unsigned char * buff, size_t buffSize, ProtocolListGamesResponse * response);
+void serializeProtocolListGamesResponse(ProtocolListGamesResponse * response, unsigned char * buff, size_t buffSize);
 
 #endif

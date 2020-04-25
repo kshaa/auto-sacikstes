@@ -5,7 +5,7 @@
 #include "state.h"
 #include "scene.h"
 #include "../common/networking/translate.h"
-#include "queries/game.h"
+#include "queries/lobby.h"
 #include "queries/ping.h"
 
 // External getopt parameters
@@ -23,7 +23,7 @@ const char usageFormat[] =
     "Action flags:\n"
     "   -h Print this help\n"
     "   -l List running games on server\n"
-    "   -j Join game with ID\n\n"
+    "   -j Join game with ID\n"
     "   -k Send keep-alive i.e. ping to server\n\n"
 
     "At least one action flag is required\n";
@@ -114,8 +114,8 @@ int main(int argc, char *argv[]) {
             printf("[client] Ping failed\n");
         }
     } else if (listGamesFlag) {
-        printf("[client] Listing games\n");
         int gameCount = getGameCount();
+        printf("[client] Currently there are %d games running\n", gameCount);
     } else if (joinGameFlag) {
         printf("[client] Joining game w/ ID: %d\n", joinGameID);
 

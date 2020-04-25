@@ -4,6 +4,7 @@
 #include "state.h"
 #include "routes/ping.h"
 #include "routes/error.h"
+#include "routes/lobby.h"
 #include <errno.h>
 #include <stdio.h>
 #include <netinet/in.h>
@@ -43,6 +44,9 @@ int routeTraffic(int connectionfd) {
     if (isMessageType(recvBuff, PROTOCOL_PING_TYPE)) {
         printf("[router] Routing to ping\n");
         success = routePing(connectionfd, recvBuff, sizeof(sendBuff), sendBuff);
+    } else if (isMessageType(recvBuff, PROTOCOL_LIST_GAMES_TYPE)) {
+        printf("[router] Routing to lobby game list\n");
+        success = routeGameList(connectionfd, recvBuff, sizeof(sendBuff), sendBuff);
     } else {
         printf("[router] Routing to error w/ unknown type\n");
         success = routeError(connectionfd, recvBuff, sizeof(sendBuff), sendBuff, PROTOCOL_ERROR_CODE_INCORRECT_TYPE);
@@ -62,6 +66,7 @@ int routeTraffic(int connectionfd) {
     }
 
     // Send message
+    printf("[router] Responding to connection %d regarding route %s\n", connectionfd, getVolatilePrintableResponseType(recvBuff));
     int sendSuccess = sendMessage(connectionfd, sendBuff, sizeof(sendBuff), MSG_DONTWAIT);
     if (!sendSuccess) {
         success = 0;

@@ -37,3 +37,13 @@ int initConnection() {
         return 1;
     }
 }
+
+int getGameCount() {
+    int count = 0;
+    for (int i = 0; i < MAX_GAMES; i++) {
+        if (games[i].created) {
+            count ++;
+        }
+    }
+    return count;
+}

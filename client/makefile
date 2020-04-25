@@ -1,7 +1,7 @@
 PROG = autosacikstes
 CC = gcc
 OBJS = init.o input.o main.o scene.o state.o 
-OBJS += queries/game.o networking/socket.o queries/ping.o
+OBJS += queries/lobby.o networking/socket.o queries/ping.o
 OBJS += ../common/networking/translate.o
 OBJS += ../common/networking/fetch.o ../common/protocol/protocol_messages.o
 LIBS = -l SDL2
