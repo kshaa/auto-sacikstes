@@ -63,4 +63,20 @@ typedef struct {
     char playerPassword[PROTOCOL_MAX_PASSWORD_LENGTH];
 } ProtocolCreateGameResponse;
 
+// Start game
+extern char PROTOCOL_START_GAME_TYPE[2];
+typedef struct {
+    char type[2];
+    int gameID;
+    char playerPassword[PROTOCOL_MAX_PASSWORD_LENGTH];
+} ProtocolStartGameRequest;
+typedef struct {
+    char type[2];
+    int playerInfoCount;
+    ProtocolPlayerInfo * playerInfos;
+    ProtocolFieldInfo field;
+} ProtocolStartGameResponse;
+void unserializeProtocolStartGameResponse(unsigned char * buff, size_t buffSize, ProtocolStartGameResponse * response);
+void serializeProtocolStartGameResponse(ProtocolStartGameResponse * response, unsigned char * buff, size_t buffSize);
+
 #endif
