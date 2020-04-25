@@ -8,6 +8,71 @@
 #include "queries/lobby.h"
 #include "queries/ping.h"
 
+void runGame() {
+    // Prepare game state
+    initState();
+
+    // Prepare scene
+    initScene();
+
+    // SDL window lifecycle
+    startSDL();
+    atexit(stopSDL);
+
+    // Game loop
+    while (1) {
+        // Input engine
+        registerInput();
+
+        // Networking engine
+        // Send input
+
+        // Physics engine
+        // if (controls.up) {
+        //     printf("Up");
+        // }
+
+        // if (controls.down) {
+        //     printf("Down");
+        // }
+
+        // if (controls.left) {
+        //     printf("Left");
+        // }
+
+        // if (controls.right) {
+        //     printf("Right");
+        // }
+
+        // Scene engine
+        // SDL_Rect car = malloc(sizeof(car));
+        // cars[0].x = player.x;
+        // cars[0].y = player.y;
+        // car.w = 100;
+        // car.h = 100;
+
+        // Render engine
+        // Background
+        SDL_SetRenderDrawColor(app.renderer, 96, 128, 255, 255);
+        SDL_RenderClear(app.renderer);
+
+        // Walls
+        for (int i = 0; i < wallsCount; i++) {
+            SDL_SetRenderDrawColor(app.renderer, 255, 0, 0, 255);
+            SDL_RenderFillRect(app.renderer, &walls[i]);
+        }
+
+        // Car
+        for (int i = 0; i < carsCount; i++) {
+            SDL_SetRenderDrawColor(app.renderer, 0, 255, 0, 255);
+            SDL_RenderFillRect(app.renderer, &cars[i]);
+        }
+
+        SDL_RenderPresent(app.renderer);
+        SDL_Delay(4);
+    }
+}
+
 // External getopt parameters
 extern char *optarg;
 extern int optind;
@@ -18,14 +83,18 @@ const char usageFormat[] =
 
     "Usage: %s [FLAGS]\n"
     "Connection flags:\n"
-    "   -a Server IPv4 connection address\n"
-    "   -p Server connection port\n"
+    "   -a [ADDRESS] Server IPv4 connection address\n"
+    "   -p [PORT] Server connection port\n"
     "Action flags:\n"
     "   -h Print this help\n"
     "   -l List running games on server\n"
-    "   -j Join game with ID\n"
-    "   -k Send keep-alive i.e. ping to server\n\n"
+    "   -c [NAME] Create game with a given name \n"
+    "   -j [ID] Join game with ID\n"
+    "   -k Send keep-alive i.e. ping to server\n"
+    "Parameter flags:\n"
+    "   -u [NAME] Player name for created game\n\n"
 
+    "Parameter flags are additions to action flags\n"
     "At least one action flag is required\n";
 
 int main(int argc, char *argv[]) {
@@ -40,12 +109,17 @@ int main(int argc, char *argv[]) {
     int keepAliveFlag = 0;
     int helpFlag = 0;
     int listGamesFlag = 0;
+    int createGameFlag = 0;
     int joinGameFlag = 0;
     int joinGameID = 0;
 
+    // Input parameters
+    char inputGameName[PROTOCOL_MAX_GAME_NAME];
+    char inputPlayerName[PROTOCOL_MAX_PLAYER_NAME];
+
     // Parse options
     int option;
-    while ((option = getopt(argc, argv, "kha:p:lj:")) != -1) {
+    while ((option = getopt(argc, argv, "kha:p:lj:c:u:")) != -1) {
         switch (option) {
             case 'k':
                 keepAliveFlag = 1;
@@ -55,6 +129,11 @@ int main(int argc, char *argv[]) {
                 break;
             case 'p':
                 server.port = atoi(optarg);
+                if (server.port == 0) {
+                    fprintf(stderr, "[client] Port must not be zero\n");
+                    fprintf(stderr, usageFormat, argv[0]);
+                    return 1;
+                }
                 break;
             case 'a':
                 strncpy(server.addressSerialized, optarg, 16);
@@ -72,21 +151,32 @@ int main(int argc, char *argv[]) {
                 joinGameFlag = 1;
                 joinGameID = atoi(optarg);
                 break;
+            case 'c':
+                createGameFlag = 1;
+                if (strlen(optarg) > PROTOCOL_MAX_GAME_NAME - 1) {
+                    fprintf(stderr, "[client] Game name too long\n");
+                    fprintf(stderr, usageFormat, argv[0]);
+                    return 1;
+                }
+                strncpy(inputGameName, optarg, PROTOCOL_MAX_GAME_NAME);
+                break;
+            case 'u':
+                if (strlen(optarg) > PROTOCOL_MAX_PLAYER_NAME - 1) {
+                    fprintf(stderr, "[client] Player name too long\n");
+                    fprintf(stderr, usageFormat, argv[0]);
+                    return 1;
+                }
+                strncpy(inputPlayerName, optarg, PROTOCOL_MAX_PLAYER_NAME);
+                break;
             default:
                 fprintf(stderr, "[client] Incorrect option provided\n");
                 fprintf(stderr, usageFormat, argv[0]);
                 return 1;
         }
     }
-    
-    // Validate port
-    if (server.port == 0) {
-        fprintf(stderr, "[server] Port must not be zero\n");
-        return 1;
-    }
 
     // At least one action is required
-    if (!(keepAliveFlag || helpFlag || listGamesFlag || joinGameFlag)) {
+    if (!(keepAliveFlag || helpFlag || listGamesFlag || createGameFlag || joinGameFlag)) {
         fprintf(stderr, "[client] At least one action is required\n");
         fprintf(stderr, usageFormat, argv[0]);
         return 1;
@@ -116,71 +206,18 @@ int main(int argc, char *argv[]) {
     } else if (listGamesFlag) {
         int gameCount = getGameCount();
         printf("[client] Currently there are %d games running\n", gameCount);
+    } else if (createGameFlag) {
+        printf("[client] Creating game!\n");
+        GameCreationResult result = createGame(inputGameName, inputPlayerName, 0);
+        if (!result.success) {
+            fprintf(stderr, "[client] Failed to create game\n");
+            return 1;
+        }
+        printf("[client] Created game! Game ID: %d, player ID: %d, player password: %s\n", result.gameID, result.playerID, result.playerPassword);
+        runGame();
     } else if (joinGameFlag) {
         printf("[client] Joining game w/ ID: %d\n", joinGameID);
-
-        // Prepare game state
-        initState();
-
-        // Prepare scene
-        initScene();
-
-        // SDL window lifecycle
-        startSDL();
-        atexit(stopSDL);
-
-        // Game loop
-        while (1) {
-            // Input engine
-            registerInput();
-
-            // Networking engine
-            // Send input
-
-            // Physics engine
-            // if (controls.up) {
-            //     printf("Up");
-            // }
-
-            // if (controls.down) {
-            //     printf("Down");
-            // }
-
-            // if (controls.left) {
-            //     printf("Left");
-            // }
-
-            // if (controls.right) {
-            //     printf("Right");
-            // }
-
-            // Scene engine
-            // SDL_Rect car = malloc(sizeof(car));
-            // cars[0].x = player.x;
-            // cars[0].y = player.y;
-            // car.w = 100;
-            // car.h = 100;
-
-            // Render engine
-            // Background
-            SDL_SetRenderDrawColor(app.renderer, 96, 128, 255, 255);
-            SDL_RenderClear(app.renderer);
-
-            // Walls
-            for (int i = 0; i < wallsCount; i++) {
-                SDL_SetRenderDrawColor(app.renderer, 255, 0, 0, 255);
-                SDL_RenderFillRect(app.renderer, &walls[i]);
-            }
-
-            // Car
-            for (int i = 0; i < carsCount; i++) {
-                SDL_SetRenderDrawColor(app.renderer, 0, 255, 0, 255);
-                SDL_RenderFillRect(app.renderer, &cars[i]);
-            }
-
-            SDL_RenderPresent(app.renderer);
-            SDL_Delay(4);
-        }
+        runGame();
     }
 
     return 0;

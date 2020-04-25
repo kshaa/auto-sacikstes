@@ -21,6 +21,7 @@ int routeGameList(int connfd, char * recvBuff, size_t sendBuffSize, char * sendB
     response.gameIDs = malloc(sizeof(int) * gamesCount);
     // Serialize it
     serializeProtocolListGamesResponse(&response, sendBuff, sendBuffSize);
+
     // Collect garbage
     free(response.gameIDs);
 

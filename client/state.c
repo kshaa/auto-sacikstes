@@ -7,8 +7,7 @@
 
 Server server;
 App app;
-Field field;
-ProtocolAction controls;
+Game game;
 
 int initState() {
     // Prepare server
@@ -22,13 +21,7 @@ int initState() {
     memset(&app, 0, sizeof(App));
 
     // Prepare field
-    memset(&field, 0, sizeof(Field));
-
-    // Prepare controls
-    memset(&controls, 0, sizeof(ProtocolAction));
-
-    // Notify of state
-    printf("[state] Initialized game state\n");
+    memset(&game, 0, sizeof(Game));
 
     return 1;
 }

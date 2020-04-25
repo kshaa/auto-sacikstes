@@ -92,7 +92,9 @@ void serializeProtocolListGamesResponse(ProtocolListGamesResponse * response, un
     ((ProtocolListGamesResponse *)buff)->gameIDsCount = response->gameIDsCount;
     // Serialize gameIDs
     for (int i = 0; i < response->gameIDsCount; i++) {
-        ((ProtocolListGamesResponse *)buff)->gameIDs[i] = response->gameIDs[i];
+        int * gameIDsOffset = (int *) buff + sizeof(char) * 2 + sizeof(int);
+        int * nthGameIDOffset = gameIDsOffset + sizeof(int) * i;
+        memcpy(nthGameIDOffset, &response->gameIDs[i], sizeof(int));
     }
 }
 

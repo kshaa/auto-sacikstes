@@ -20,6 +20,6 @@
 
 // Games configurations
 #define MAX_GAMES 1000
-#define MAX_GAME_PLAYERS 100
+#define MAX_GAME_PLAYERS COMMON_MAX_GAME_PLAYERS
 
 #endif

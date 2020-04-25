@@ -5,19 +5,19 @@
 void registerKeyUp(SDL_KeyboardEvent *event) {
     if (event->repeat == 0) {
         if (event->keysym.scancode == SDL_SCANCODE_UP) {
-            controls.y = Y_NONE;
+            game.controls.y = Y_NONE;
         }
 
         if (event->keysym.scancode == SDL_SCANCODE_DOWN) {
-            controls.y = Y_NONE;
+            game.controls.y = Y_NONE;
         }
 
         if (event->keysym.scancode == SDL_SCANCODE_LEFT) {
-            controls.x = X_NONE;
+            game.controls.x = X_NONE;
         }
 
         if (event->keysym.scancode == SDL_SCANCODE_RIGHT) {
-            controls.x = X_NONE;
+            game.controls.x = X_NONE;
         }
     }
 }
@@ -25,19 +25,19 @@ void registerKeyUp(SDL_KeyboardEvent *event) {
 void registerKeyDown(SDL_KeyboardEvent *event) {
     if (event->repeat == 0) {
         if (event->keysym.scancode == SDL_SCANCODE_UP) {
-            controls.y = Y_UP;
+            game.controls.y = Y_UP;
         }
 
         if (event->keysym.scancode == SDL_SCANCODE_DOWN) {
-            controls.y = Y_DOWN; 
+            game.controls.y = Y_DOWN; 
         }
 
         if (event->keysym.scancode == SDL_SCANCODE_LEFT) {
-            controls.x = X_LEFT;
+            game.controls.x = X_LEFT;
         }
 
         if (event->keysym.scancode == SDL_SCANCODE_RIGHT) {
-            controls.x = X_RIGHT;
+            game.controls.x = X_RIGHT;
         }
     }
 }

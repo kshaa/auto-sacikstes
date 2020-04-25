@@ -12,4 +12,7 @@
 // Default port
 #define COMMON_DEFAULT_SERVER_PORT 5000
 
+// Non-protocol game constants
+#define COMMON_MAX_GAME_PLAYERS 100
+
 #endif
