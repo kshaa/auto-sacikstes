@@ -52,6 +52,7 @@ void runGame() {
         // car.h = 100;
 
         // Render engine
+
         // Background
         SDL_SetRenderDrawColor(app.renderer, 96, 128, 255, 255);
         SDL_RenderClear(app.renderer);
@@ -242,7 +243,7 @@ int main(int argc, char *argv[]) {
         getchar();
         // Send start request
         ProtocolStartGameResponse startGameResponse;
-        startGameResponse.playerInfos = malloc(RECV_BUFF_SIZE);
+        startGameResponse.playerInfos = malloc(sizeof(ProtocolPlayerInfo) * MAX_GAME_PLAYERS);
         int startSuccess = startGame(&startGameResponse, createGameResponse.gameID, createGameResponse.playerPassword);
         if (!startSuccess) {
             fprintf(stderr, "[client] Failed to start game\n");
@@ -257,7 +258,6 @@ int main(int argc, char *argv[]) {
         );
         // Start the game
         runGame();
-        free(startGameResponse.playerInfos);
     } else if (joinGameFlag) {
         printf("[client] Joining game w/ ID: %d\n", joinGameID);
         runGame();

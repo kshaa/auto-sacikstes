@@ -62,3 +62,31 @@ int routeGameCreate(int connfd, char * recvBuff, size_t sendBuffSize, char * sen
 
     return 1;
 }
+
+int routeStartGame(int connfd, char * recvBuff, size_t sendBuffSize, char * sendBuff) {
+    int canSend = sizeof(ProtocolStartGameResponse) <= sendBuffSize;
+    if (!canSend) {
+        return 0;
+    }
+
+    // Parse request
+    ProtocolStartGameRequest * request = (ProtocolStartGameRequest *) recvBuff;
+
+    // Start game
+    games[request->gameID].info.status = STARTED;
+
+    // Generate response
+    ProtocolStartGameResponse response;
+    strncpy(response.type, PROTOCOL_START_GAME_TYPE, sizeof(PROTOCOL_START_GAME_TYPE));
+    response.playerInfoCount = getGamePlayerCount(request->gameID);
+    response.playerInfos = malloc(sizeof(ProtocolPlayerInfo) * response.playerInfoCount);
+    for (int i = 0; i < response.playerInfoCount; i++) {
+        memcpy(&response.playerInfos[i], &games[request->gameID].player[i].info, sizeof(ProtocolPlayerInfo));
+    }
+    memcpy(&response.field, &games[request->gameID].field.info, sizeof(ProtocolFieldInfo));
+
+    // Serialize it
+    serializeProtocolStartGameResponse(&response, sendBuff, sendBuffSize);
+
+    return 1;
+}

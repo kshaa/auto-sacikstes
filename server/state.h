@@ -25,6 +25,7 @@ typedef struct {
 extern Server server;
 extern Game games[MAX_GAMES];
 int getGameCount();
+int getGamePlayerCount(int gameID);
 
 // Initialize global state
 int initState();

@@ -117,7 +117,7 @@ void unserializeProtocolStartGameResponse(unsigned char * buff, size_t buffSize,
     // Unserialize field
     memcpy(&response->field, &((ProtocolStartGameResponse *)buff)->field, sizeof(ProtocolFieldInfo));
     // Unserialize playerInfos
-    response->playerInfos = malloc(response->playerInfoCount * sizeof(int));
+    response->playerInfos = malloc(response->playerInfoCount * sizeof(ProtocolPlayerInfo));
     for (int i = 0; i < response->playerInfoCount; i++) {
         ProtocolPlayerInfo * playerInfosOffset = (ProtocolPlayerInfo *) buff + sizeof(char) * 2 + sizeof(int);
         ProtocolPlayerInfo * nthPlayerInfoOffset = playerInfosOffset + sizeof(ProtocolPlayerInfo) * i;

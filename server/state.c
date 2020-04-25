@@ -47,3 +47,13 @@ int getGameCount() {
     }
     return count;
 }
+
+int getGamePlayerCount(int gameID) {
+    int count = 0;
+    for (int i = 0; i < MAX_GAME_PLAYERS; i++) {
+        if (games[gameID].player[i].created) {
+            count++;
+        }
+    }
+    return count;
+}

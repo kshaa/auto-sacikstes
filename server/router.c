@@ -50,6 +50,9 @@ int routeTraffic(int connectionfd) {
     } else if (isMessageType(recvBuff, PROTOCOL_CREATE_GAME_TYPE)) {
         printf("[router] Routing to lobby create game\n");
         success = routeGameCreate(connectionfd, recvBuff, sizeof(sendBuff), sendBuff);
+    } else if (isMessageType(recvBuff, PROTOCOL_START_GAME_TYPE)) {
+        printf("[router] Routing to lobby start game\n");
+        success = routeStartGame(connectionfd, recvBuff, sizeof(sendBuff), sendBuff);
     } else {
         printf("[router] Routing to error w/ unknown type\n");
         success = routeError(connectionfd, recvBuff, sizeof(sendBuff), sendBuff, PROTOCOL_ERROR_CODE_INCORRECT_TYPE);
