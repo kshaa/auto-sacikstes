@@ -2,6 +2,7 @@
 #define PROTOCOL_MESSAGES_H
 
 #include <stdlib.h>
+#include "protocol_types.h"
 
 // Message types
 unsigned char * getVolatileResponseType(void * message);
@@ -45,5 +46,21 @@ typedef struct {
 int getProtocolListGamesResponseCount(void * buff, size_t buffSize);
 void unserializeProtocolListGamesResponse(unsigned char * buff, size_t buffSize, ProtocolListGamesResponse * response);
 void serializeProtocolListGamesResponse(ProtocolListGamesResponse * response, unsigned char * buff, size_t buffSize);
+
+// Create game
+extern char PROTOCOL_CREATE_GAME_TYPE[2];
+typedef struct {
+    char type[2];
+    char gameName[PROTOCOL_MAX_GAME_NAME];
+    char playerName[PROTOCOL_MAX_PLAYER_NAME];
+    int fieldID;
+} ProtocolCreateGameRequest;
+
+typedef struct {
+    char type[2];
+    int gameID;
+    int playerID;
+    char playerPassword[PROTOCOL_MAX_PASSWORD_LENGTH];
+} ProtocolCreateGameResponse;
 
 #endif

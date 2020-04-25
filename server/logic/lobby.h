@@ -1,6 +1,7 @@
 #ifndef LOGIC_LOBBY_H
 #define LOGIC_LOBBY_H
 
-int createGame(char * gameName, char * playerName, int fieldID);
+int createGame(char * gameName, int fieldID);
+int addGamePlayer(int gameID, char * playerName, int connectionfd);
 
 #endif

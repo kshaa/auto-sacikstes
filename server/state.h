@@ -9,6 +9,7 @@
 typedef struct {
     int created;
     int connectionfd;
+    char password[PROTOCOL_MAX_PASSWORD_LENGTH];
     ProtocolPlayerInfo info;
 } Player;
 

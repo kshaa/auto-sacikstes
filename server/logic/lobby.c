@@ -1,7 +1,8 @@
 #include "../../common/protocol/protocol_types.h"
 #include "../state.h"
+#include <string.h>
 
-int createGame(char * gameName, char * playerName, int fieldID) {
+int createGame(char * gameName, int fieldID) {
     int freeSlotAvailable = 0;
     int success = 1;
     Game game;

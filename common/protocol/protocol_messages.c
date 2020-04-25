@@ -95,3 +95,6 @@ void serializeProtocolListGamesResponse(ProtocolListGamesResponse * response, un
         ((ProtocolListGamesResponse *)buff)->gameIDs[i] = response->gameIDs[i];
     }
 }
+
+// Create game
+char PROTOCOL_CREATE_GAME_TYPE[] = { 'C', 'G' };
