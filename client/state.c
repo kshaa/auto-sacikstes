@@ -8,6 +8,7 @@
 Server server;
 App app;
 Game game;
+Scene scene;
 
 int initState() {
     // Prepare server
@@ -20,7 +21,7 @@ int initState() {
     // Prepare app
     memset(&app, 0, sizeof(App));
 
-    // Prepare field
+    // Prepare game
     memset(&game, 0, sizeof(Game));
 
     return 1;

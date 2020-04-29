@@ -2,12 +2,18 @@
 #define SCENE_H
 
 #include "SDL2/SDL.h"
+#include "../common/protocol/protocol_types.h"
 
-int carsCount;
-SDL_Rect * cars;
+enum WALL_TYPE {
+    STARTWALL = 0,
+    EXTRAWALL = 1,
+};
 
-int wallsCount;
-SDL_Rect * walls;
+typedef struct {
+    int type;
+    ProtocolLine line;
+    SDL_Rect rect;
+} SceneWall;
 
 void initScene();
 

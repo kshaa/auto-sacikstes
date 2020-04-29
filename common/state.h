@@ -17,7 +17,7 @@ typedef struct {
     ProtocolFieldInfo info;
     ProtocolLine startLine;
     ProtocolLine mainLine;
-    size_t extraLinesCount;
+    int extraLinesCount;
     ProtocolLine * extraLines;
 } Field;
 

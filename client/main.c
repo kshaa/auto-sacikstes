@@ -10,10 +10,7 @@
 #include "../common/logic/math.h"
 
 void runGame() {
-    // Prepare game state
-    initState();
-
-    // Prepare scene
+    // Prepare scene from global storage
     initScene();
 
     // SDL window lifecycle
@@ -55,20 +52,24 @@ void runGame() {
         // Render engine
 
         // Background
-        SDL_SetRenderDrawColor(app.renderer, 96, 128, 255, 255);
+        SDL_SetRenderDrawColor(app.renderer, BACKGROUND_R, BACKGROUND_G, BACKGROUND_B, 255);
         SDL_RenderClear(app.renderer);
 
         // Walls
-        for (int i = 0; i < wallsCount; i++) {
-            SDL_SetRenderDrawColor(app.renderer, 255, 0, 0, 255);
-            SDL_RenderFillRect(app.renderer, &walls[i]);
+        for (int i = 0; i < scene.wallCount; i++) {
+            if (scene.walls[i].type == STARTWALL) {
+                SDL_SetRenderDrawColor(app.renderer, STARTWALL_R, STARTWALL_G, STARTWALL_B, 255);
+            } else {
+                SDL_SetRenderDrawColor(app.renderer, EXTRAWALL_R, EXTRAWALL_G, EXTRAWALL_B, 255);
+            }
+            SDL_RenderFillRect(app.renderer, &scene.walls[i].rect);
         }
 
         // Car
-        for (int i = 0; i < carsCount; i++) {
-            SDL_SetRenderDrawColor(app.renderer, 0, 255, 0, 255);
-            SDL_RenderFillRect(app.renderer, &cars[i]);
-        }
+        // for (int i = 0; i < carsCount; i++) {
+        //     SDL_SetRenderDrawColor(app.renderer, 0, 255, 0, 255);
+        //     SDL_RenderFillRect(app.renderer, &cars[i]);
+        // }
 
         SDL_RenderPresent(app.renderer);
         SDL_Delay(4);
@@ -269,6 +270,12 @@ int main(int argc, char *argv[]) {
             createGameResponse.playerID,
             createGameResponse.playerPassword
         );
+        // Load game info globally
+        strncpy(game.info.name, inputGameName, PROTOCOL_MAX_GAME_NAME);
+        game.info.status = WAITING_PLAYERS;
+        // Load game player info globally
+        game.selfPlayerID = createGameResponse.playerID;
+        strncpy(game.selfPlayerPassword, createGameResponse.playerPassword, PROTOCOL_MAX_PASSWORD_LENGTH);
         // Wait until need to start
         printf("[client] Press enter to start the game!\n");
         getchar();
@@ -281,21 +288,43 @@ int main(int argc, char *argv[]) {
             return 1;
         }
         printf("[client] Starting game!\n");
-        printf(
-            "[client] Player count: %d, Field ID: %d, field width: %d, field height: %d\n",
-            startGameResponse.playerInfoCount,
-            startGameResponse.field.id,
-            startGameResponse.field.width,
-            startGameResponse.field.height
-        );
-        printf("[client] Field start line: ");
-        printLine(&startGameResponse.startLine);
-        printf("\n");
-        for (int i = 0; i < startGameResponse.extraLineCount; i++) {
-            printf("[client] Field extra line: ");
-            printLine(&startGameResponse.extraLines[i]);
+        // Debug sent lines
+        if (DEBUG) {
+            printf(
+                "[client] Player count: %d, Field ID: %d, field width: %d, field height: %d\n",
+                startGameResponse.playerInfoCount,
+                startGameResponse.field.id,
+                startGameResponse.field.width,
+                startGameResponse.field.height
+            );
+            printf("[client] Field start line: ");
+            printLine(&startGameResponse.startLine);
             printf("\n");
+            for (int i = 0; i < startGameResponse.extraLineCount; i++) {
+                printf("[client] Field extra line: ");
+                printLine(&startGameResponse.extraLines[i]);
+                printf("\n");
+            }
         }
+
+        // Store game info globally
+        game.info.status = STARTED;
+
+        // Store field in global storage
+        memcpy(&game.field.info, &startGameResponse.field, sizeof(ProtocolFieldInfo));
+        memcpy(&game.field.startLine, &startGameResponse.startLine, sizeof(ProtocolLine));
+        game.field.extraLinesCount = startGameResponse.extraLineCount;
+        game.field.extraLines = malloc(sizeof(ProtocolLine) * game.field.extraLinesCount);
+        for (int i = 0; i < game.field.extraLinesCount; i++) {
+            memcpy(&game.field.extraLines[i], &startGameResponse.extraLines[i], sizeof(ProtocolLine));
+        }
+
+        // Store players in global storage
+        for (int i = 0; i < startGameResponse.playerInfoCount; i++) {
+            game.player[i].created = 1;
+            memcpy(&game.player[i].info, &startGameResponse.playerInfos[i], sizeof(Field));
+        }
+
         // Start the game
         runGame();
     } else if (joinGameFlag) {
