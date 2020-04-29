@@ -115,16 +115,16 @@ int main(int argc, char *argv[]) {
     int listFieldsFlag = 0;
     int createGameFlag = 0;
     int joinGameFlag = 0;
-    int joinGameID = 0;
 
     // Input parameters
     char inputGameName[PROTOCOL_MAX_GAME_NAME];
     char inputPlayerName[PROTOCOL_MAX_PLAYER_NAME];
+    int inputGameID = 0;
     int inputFieldID = 0;
 
     // Parse options
     int option;
-    while ((option = getopt(argc, argv, "ikha:p:lj:c:u:")) != -1) {
+    while ((option = getopt(argc, argv, "ikha:p:lj:c:u:f:")) != -1) {
         switch (option) {
             case 'i':
                 listFieldsFlag = 1;
@@ -157,7 +157,7 @@ int main(int argc, char *argv[]) {
                 break;
             case 'j':
                 joinGameFlag = 1;
-                joinGameID = atoi(optarg);
+                inputGameID = atoi(optarg);
                 break;
             case 'c':
                 createGameFlag = 1;
@@ -175,6 +175,14 @@ int main(int argc, char *argv[]) {
                     return 1;
                 }
                 strncpy(inputPlayerName, optarg, PROTOCOL_MAX_PLAYER_NAME);
+                break;
+            case 'f':
+                inputFieldID = atoi(optarg);
+                if (inputFieldID == 0) {
+                    fprintf(stderr, "[client] Field ID must be a positive integer as per protocol\n");
+                    fprintf(stderr, usageFormat, argv[0]);
+                    return 1;
+                }
                 break;
             default:
                 fprintf(stderr, "[client] Incorrect option provided\n");
@@ -281,7 +289,7 @@ int main(int argc, char *argv[]) {
         // Start the game
         runGame();
     } else if (joinGameFlag) {
-        printf("[client] Joining game w/ ID: %d\n", joinGameID);
+        printf("[client] Joining game w/ ID: %d\n", inputGameID);
         runGame();
     }
 

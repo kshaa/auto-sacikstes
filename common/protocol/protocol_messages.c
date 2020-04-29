@@ -118,12 +118,13 @@ void unserializeProtocolStartGameResponse(unsigned char * buff, size_t buffSize,
     // Unserialize playerInfoCount
     response->playerInfoCount = ((ProtocolStartGameResponse *)buff)->playerInfoCount;
     // Unserialize field
-    memcpy(&response->field, &((ProtocolStartGameResponse *)buff)->field, sizeof(ProtocolFieldInfo));
+    ProtocolFieldInfo * fieldOffset = (ProtocolFieldInfo *) (buff + sizeof(char) * 2 + sizeof(int) + sizeof(ProtocolPlayerInfo) * response->playerInfoCount);
+    memcpy(&response->field, fieldOffset, sizeof(ProtocolFieldInfo));
     // Unserialize playerInfos
     response->playerInfos = malloc(response->playerInfoCount * sizeof(ProtocolPlayerInfo));
     for (int i = 0; i < response->playerInfoCount; i++) {
-        ProtocolPlayerInfo * playerInfosOffset = (ProtocolPlayerInfo *) buff + sizeof(char) * 2 + sizeof(int);
-        ProtocolPlayerInfo * nthPlayerInfoOffset = playerInfosOffset + sizeof(ProtocolPlayerInfo) * i;
+        ProtocolPlayerInfo * playerInfosOffset = (ProtocolPlayerInfo *) (buff + sizeof(char) * 2 + sizeof(int));
+        ProtocolPlayerInfo * nthPlayerInfoOffset = playerInfosOffset + i;
         memcpy(&response->playerInfos[i], nthPlayerInfoOffset, sizeof(ProtocolPlayerInfo));
     }
 }
@@ -134,11 +135,11 @@ void serializeProtocolStartGameResponse(ProtocolStartGameResponse * response, un
     ((ProtocolStartGameResponse *)buff)->playerInfoCount = response->playerInfoCount;
     // Serialize playerInfos & field
     for (int i = 0; i < response->playerInfoCount; i++) {
-        ProtocolPlayerInfo * playerInfosOffset = (ProtocolPlayerInfo *) buff + sizeof(char) * 2 + sizeof(int);
-        ProtocolPlayerInfo * nthPlayerInfoOffset = playerInfosOffset + sizeof(ProtocolPlayerInfo) * i;
+        ProtocolPlayerInfo * playerInfosOffset = (ProtocolPlayerInfo *) (buff + sizeof(char) * 2 + sizeof(int));
+        ProtocolPlayerInfo * nthPlayerInfoOffset = playerInfosOffset + i;
         memcpy(nthPlayerInfoOffset, &response->playerInfos[i], sizeof(int));
     }
     // Serialize field
-    ProtocolFieldInfo * fieldOffset = (ProtocolFieldInfo *) buff + sizeof(char) * 2 + sizeof(int) + sizeof(ProtocolPlayerInfo) * response->playerInfoCount;
+    ProtocolFieldInfo * fieldOffset = (ProtocolFieldInfo *) (buff + sizeof(char) * 2 + sizeof(int) + sizeof(ProtocolPlayerInfo) * response->playerInfoCount);
     memcpy(fieldOffset, &response->field, sizeof(ProtocolFieldInfo));
 }
