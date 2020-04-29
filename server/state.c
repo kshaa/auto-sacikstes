@@ -29,7 +29,7 @@ int initConnection() {
     printf("[state] Server socket defined as %s:%d\n", server.addressSerialized, server.port);
     serverfd = listenTCP(server.address, server.port);
     if (serverfd == -1) {
-        fprintf(stderr, "[state] Failed to create server socket");
+        fprintf(stderr, "[state] Failed to create server socket\n");
         return 0;
     } else {
         if (DEBUG) printf("[state] Server socket is listening, fd: %d\n", serverfd);

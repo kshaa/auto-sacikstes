@@ -44,7 +44,7 @@ int routeGameList(int connfd, char * recvBuff, size_t sendBuffSize, char * sendB
     return 1;
 }
 
-int routeGameCreate(int connfd, char * recvBuff, size_t sendBuffSize, char * sendBuff) {
+int routeGameCreate(int connfd, char * recvBuff, size_t sendBuffSize, unsigned char * sendBuff) {
     int gamesCount = getGameCount();
     int canSend = sizeof(ProtocolCreateGameResponse) <= sendBuffSize;
     if (!canSend) {
@@ -98,9 +98,16 @@ int routeStartGame(int connfd, char * recvBuff, size_t sendBuffSize, char * send
         memcpy(&response.playerInfos[i], &games[request->gameID].player[i].info, sizeof(ProtocolPlayerInfo));
     }
     memcpy(&response.field, &games[request->gameID].field.info, sizeof(ProtocolFieldInfo));
+    response.extraLines = malloc(sizeof(ProtocolLine) * games[request->gameID].field.extraLinesCount);
+    memcpy(response.extraLines, games[request->gameID].field.extraLines, sizeof(ProtocolLine) * games[request->gameID].field.extraLinesCount);
+    memcpy(&response.startLine, &games[request->gameID].field.startLine, sizeof(ProtocolLine));
+    memcpy(&response.mainLine, &games[request->gameID].field.mainLine, sizeof(ProtocolLine));
+    response.extraLineCount = games[request->gameID].field.extraLinesCount;
 
     // Serialize it
     serializeProtocolStartGameResponse(&response, sendBuff, sendBuffSize);
+    free(response.playerInfos);
+    free(response.extraLines);
 
     return 1;
 }

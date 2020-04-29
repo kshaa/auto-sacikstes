@@ -83,6 +83,10 @@ typedef struct {
     int playerInfoCount;
     ProtocolPlayerInfo * playerInfos;
     ProtocolFieldInfo field;
+    ProtocolLine startLine;
+    ProtocolLine mainLine;
+    int extraLineCount;
+    ProtocolLine * extraLines;
 } ProtocolStartGameResponse;
 void unserializeProtocolStartGameResponse(unsigned char * buff, size_t buffSize, ProtocolStartGameResponse * response);
 void serializeProtocolStartGameResponse(ProtocolStartGameResponse * response, unsigned char * buff, size_t buffSize);

@@ -7,6 +7,7 @@
 #include "../common/networking/translate.h"
 #include "queries/lobby.h"
 #include "queries/ping.h"
+#include "../common/logic/math.h"
 
 void runGame() {
     // Prepare game state
@@ -279,13 +280,22 @@ int main(int argc, char *argv[]) {
             fprintf(stderr, "[client] Failed to start game\n");
             return 1;
         }
+        printf("[client] Starting game!\n");
         printf(
-            "[client] Starting game! Player count: %d, Field ID: %d, field width: %d, field height: %d\n",
+            "[client] Player count: %d, Field ID: %d, field width: %d, field height: %d\n",
             startGameResponse.playerInfoCount,
             startGameResponse.field.id,
             startGameResponse.field.width,
             startGameResponse.field.height
         );
+        printf("[client] Field start line: ");
+        printLine(&startGameResponse.startLine);
+        printf("\n");
+        for (int i = 0; i < startGameResponse.extraLineCount; i++) {
+            printf("[client] Field extra line: ");
+            printLine(&startGameResponse.extraLines[i]);
+            printf("\n");
+        }
         // Start the game
         runGame();
     } else if (joinGameFlag) {

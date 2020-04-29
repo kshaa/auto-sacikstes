@@ -117,15 +117,31 @@ void unserializeProtocolStartGameResponse(unsigned char * buff, size_t buffSize,
     strncpy(response->type, buff, 2);
     // Unserialize playerInfoCount
     response->playerInfoCount = ((ProtocolStartGameResponse *)buff)->playerInfoCount;
-    // Unserialize field
-    ProtocolFieldInfo * fieldOffset = (ProtocolFieldInfo *) (buff + sizeof(char) * 2 + sizeof(int) + sizeof(ProtocolPlayerInfo) * response->playerInfoCount);
-    memcpy(&response->field, fieldOffset, sizeof(ProtocolFieldInfo));
     // Unserialize playerInfos
     response->playerInfos = malloc(response->playerInfoCount * sizeof(ProtocolPlayerInfo));
     for (int i = 0; i < response->playerInfoCount; i++) {
         ProtocolPlayerInfo * playerInfosOffset = (ProtocolPlayerInfo *) (buff + sizeof(char) * 2 + sizeof(int));
         ProtocolPlayerInfo * nthPlayerInfoOffset = playerInfosOffset + i;
         memcpy(&response->playerInfos[i], nthPlayerInfoOffset, sizeof(ProtocolPlayerInfo));
+    }
+    // Unserialize field info
+    unsigned char * fieldInfoOffset = buff + sizeof(char) * 2 + sizeof(int) + sizeof(ProtocolPlayerInfo) * response->playerInfoCount;
+    memcpy(&response->field, (ProtocolFieldInfo *) fieldInfoOffset, sizeof(ProtocolFieldInfo));
+
+    // Unserialize field data
+    unsigned char * fieldMainlineOffset = fieldInfoOffset + sizeof(ProtocolFieldInfo);
+    memcpy(&response->mainLine, fieldMainlineOffset, sizeof(ProtocolLine));
+
+    unsigned char * fieldStartlineOffset = fieldMainlineOffset + sizeof(ProtocolLine);
+    memcpy(&response->startLine, fieldStartlineOffset, sizeof(ProtocolLine));
+
+    unsigned char * fieldExtracountOffset = fieldStartlineOffset + sizeof(ProtocolLine);
+    memcpy(&response->extraLineCount, fieldExtracountOffset, sizeof(int));
+
+    response->extraLines = malloc(response->extraLineCount * sizeof(ProtocolLine));
+    unsigned char * fieldExtralineOffset = fieldExtracountOffset + sizeof(int);
+    for (int i = 0; i < response->extraLineCount; i++) {
+        memcpy(&response->extraLines[i], (ProtocolLine *) (fieldExtralineOffset + i * sizeof(ProtocolLine)), sizeof(ProtocolLine));
     }
 }
 
@@ -139,7 +155,22 @@ void serializeProtocolStartGameResponse(ProtocolStartGameResponse * response, un
         ProtocolPlayerInfo * nthPlayerInfoOffset = playerInfosOffset + i;
         memcpy(nthPlayerInfoOffset, &response->playerInfos[i], sizeof(int));
     }
-    // Serialize field
-    ProtocolFieldInfo * fieldOffset = (ProtocolFieldInfo *) (buff + sizeof(char) * 2 + sizeof(int) + sizeof(ProtocolPlayerInfo) * response->playerInfoCount);
-    memcpy(fieldOffset, &response->field, sizeof(ProtocolFieldInfo));
+    // Serialize field info
+    unsigned char * fieldInfoOffset = buff + sizeof(char) * 2 + sizeof(int) + sizeof(ProtocolPlayerInfo) * response->playerInfoCount;
+    memcpy((ProtocolFieldInfo *) fieldInfoOffset, &response->field, sizeof(ProtocolFieldInfo));
+
+    // Serialize field data
+    unsigned char * fieldMainlineOffset = fieldInfoOffset + sizeof(ProtocolFieldInfo);
+    memcpy(fieldMainlineOffset, &response->mainLine, sizeof(ProtocolLine));
+
+    unsigned char * fieldStartlineOffset = fieldMainlineOffset + sizeof(ProtocolLine);
+    memcpy(fieldStartlineOffset, &response->startLine, sizeof(ProtocolLine));
+
+    unsigned char * fieldExtracountOffset = fieldStartlineOffset + sizeof(ProtocolLine);
+    memcpy(fieldExtracountOffset, &response->extraLineCount, sizeof(int));
+
+    unsigned char * fieldExtralineOffset = fieldExtracountOffset + sizeof(int);
+    for (int i = 0; i < response->extraLineCount; i++) {
+        memcpy((ProtocolLine *) (fieldExtralineOffset +  i * sizeof(ProtocolLine)), &response->extraLines[i], sizeof(ProtocolLine));
+    }
 }
