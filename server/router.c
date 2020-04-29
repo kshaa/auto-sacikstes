@@ -44,6 +44,9 @@ int routeTraffic(int connectionfd) {
     if (isMessageType(recvBuff, PROTOCOL_PING_TYPE)) {
         printf("[router] Routing to ping\n");
         success = routePing(connectionfd, recvBuff, sizeof(sendBuff), sendBuff);
+    } else if (isMessageType(recvBuff, PROTOCOL_LIST_FIELDS_TYPE)) {
+        printf("[router] Routing to lobby field list\n");
+        success = routeFieldList(connectionfd, recvBuff, sizeof(sendBuff), sendBuff);
     } else if (isMessageType(recvBuff, PROTOCOL_LIST_GAMES_TYPE)) {
         printf("[router] Routing to lobby game list\n");
         success = routeGameList(connectionfd, recvBuff, sizeof(sendBuff), sendBuff);

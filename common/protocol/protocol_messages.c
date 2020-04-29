@@ -57,6 +57,9 @@ char * getVolatileErrorMessage(char errorCode[2]) {
     return PROTOCOL_ERROR_MESSAGE_UNKNOWN;
 }
 
+// List fields
+char PROTOCOL_LIST_FIELDS_TYPE[] = { 'N', 'F' };
+
 // List games
 char PROTOCOL_LIST_GAMES_TYPE[] = { 'L', 'I' };
 int getProtocolListGamesResponseCount(void * buff, size_t buffSize) {

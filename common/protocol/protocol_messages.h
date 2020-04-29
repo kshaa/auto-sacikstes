@@ -35,6 +35,14 @@ extern char PROTOCOL_ERROR_CODE_SERVER_IS_SAD[2];
 int isErrorCode(char * a, char * b);
 char * getVolatileErrorMessage(char errorCode[2]);
 
+// List fields
+extern char PROTOCOL_LIST_FIELDS_TYPE[2];
+typedef ProtocolEmpty ProtocolListFieldsRequest;
+typedef struct {
+    char type[2];
+    int fieldCount;
+} ProtocolListFieldsResponse;
+
 // List games
 extern char PROTOCOL_LIST_GAMES_TYPE[2];
 typedef ProtocolEmpty ProtocolListGamesRequest;

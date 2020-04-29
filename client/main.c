@@ -89,11 +89,13 @@ const char usageFormat[] =
     "Action flags:\n"
     "   -h Print this help\n"
     "   -l List running games on server\n"
+    "   -i List fields available on server\n"
     "   -c [NAME] Create game with a given name \n"
     "   -j [ID] Join game with ID\n"
     "   -k Send keep-alive i.e. ping to server\n"
     "Parameter flags:\n"
     "   -u [NAME] Player name for created game\n\n"
+    "   -f [ID] Field id for created game\n\n"
 
     "Parameter flags are additions to action flags\n"
     "At least one action flag is required\n";
@@ -110,6 +112,7 @@ int main(int argc, char *argv[]) {
     int keepAliveFlag = 0;
     int helpFlag = 0;
     int listGamesFlag = 0;
+    int listFieldsFlag = 0;
     int createGameFlag = 0;
     int joinGameFlag = 0;
     int joinGameID = 0;
@@ -121,8 +124,11 @@ int main(int argc, char *argv[]) {
 
     // Parse options
     int option;
-    while ((option = getopt(argc, argv, "kha:p:lj:c:u:")) != -1) {
+    while ((option = getopt(argc, argv, "ikha:p:lj:c:u:")) != -1) {
         switch (option) {
+            case 'i':
+                listFieldsFlag = 1;
+                break;
             case 'k':
                 keepAliveFlag = 1;
                 break;
@@ -178,7 +184,7 @@ int main(int argc, char *argv[]) {
     }
 
     // At least one action is required
-    if (!(keepAliveFlag || helpFlag || listGamesFlag || createGameFlag || joinGameFlag)) {
+    if (!(keepAliveFlag || helpFlag || listFieldsFlag || listGamesFlag || createGameFlag || joinGameFlag)) {
         fprintf(stderr, "[client] At least one action is required\n");
         fprintf(stderr, usageFormat, argv[0]);
         return 1;
@@ -204,6 +210,22 @@ int main(int argc, char *argv[]) {
             printf("[client] Ping successful\n");
         } else {
             printf("[client] Ping failed\n");
+        }
+    } else if (listFieldsFlag) {
+        ProtocolListFieldsResponse fieldIDs;
+        int fieldCountSuccess = getFieldCount(&fieldIDs);
+        if (!fieldCountSuccess) {
+            fprintf(stderr, "[client] Failed to list fields\n");
+            return 1;
+        }
+        if (fieldIDs.fieldCount > 0) {
+            printf("[client] Available fields: ");
+            for (int i = 0; i < fieldIDs.fieldCount; i++) {
+                printf("%d ", i + 1);
+            }
+            printf("\n");
+        } else {
+            printf("[client] No fields available\n");
         }
     } else if (listGamesFlag) {
         ProtocolListGamesResponse gameIDs;

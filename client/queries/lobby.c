@@ -4,6 +4,41 @@
 #include "../../common/networking/fetch.h"
 #include "../const.h"
 
+int getFieldCount(ProtocolListFieldsResponse * buff) {
+    int success = 1;
+    // Use connection from global client state
+    int connectionfd = server.fd;
+
+    // Generate request
+    ProtocolListFieldsRequest request;
+    strncpy(request.type, PROTOCOL_LIST_FIELDS_TYPE, sizeof(PROTOCOL_LIST_FIELDS_TYPE));
+
+    // Send request
+    unsigned char * recvBuff = fetch(connectionfd, &request, sizeof(ProtocolListFieldsRequest));
+    if (!recvBuff) {
+        if (DEBUG) printf("[listfields] List fields request failed\n");
+        success = 0;
+        return success;
+    }
+
+    // Process response
+    printf("[listgames] Received: %s\n", getVolatilePrintableResponseType(recvBuff));
+    if (isMessageType(recvBuff, PROTOCOL_LIST_FIELDS_TYPE)) {
+        memcpy(buff, recvBuff, sizeof(ProtocolListFieldsResponse));
+        return success;
+    } else {
+        // Request error
+        if (isMessageType(recvBuff, PROTOCOL_ERROR_TYPE)) {
+            ProtocolErrorResponse * error = (ProtocolErrorResponse *) recvBuff;
+            if (DEBUG) printf("[listfields] List fields failed w/ error: %s\n", getVolatileErrorMessage(error->errorCode));
+        } else {
+            if (DEBUG) printf("[listfields] List fields failed w/ unknown error\n");
+        }
+        success = 0;
+        return success;
+    }
+}
+
 int getGameIDs(ProtocolListGamesResponse * buff, int copyOnlyCount) {
     int success = 1;
     // Use connection from global client state

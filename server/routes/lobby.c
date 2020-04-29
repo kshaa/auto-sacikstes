@@ -7,6 +7,20 @@
 #include <stdio.h>
 #include "../logic/lobby.h"
 
+int routeFieldList(int connfd, char * recvBuff, size_t sendBuffSize, char * sendBuff) {
+    // Generate response
+    ProtocolListFieldsResponse response;
+    strncpy(response.type, PROTOCOL_LIST_FIELDS_TYPE, sizeof(PROTOCOL_LIST_FIELDS_TYPE));
+
+    // Temporarily hardcoded
+    response.fieldCount = 1;
+
+    // Send response
+    memcpy(sendBuff, &response, sendBuffSize);
+
+    return 1;
+}
+
 int routeGameList(int connfd, char * recvBuff, size_t sendBuffSize, char * sendBuff) {
     // Generate response
     ProtocolListGamesResponse response;
