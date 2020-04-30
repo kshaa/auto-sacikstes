@@ -5,7 +5,7 @@ OBJS += queries/lobby.o networking/socket.o queries/ping.o
 OBJS += ../common/networking/translate.o ../common/logic/math.o
 OBJS += ../common/networking/fetch.o ../common/protocol/protocol_messages.o
 LIBS = -l SDL2
-CFLAGS = ${LIBS} ${INCLUDES} 
+CFLAGS = ${LIBS} ${INCLUDES} -g
 
 # Make actions
 all: ${PROG}

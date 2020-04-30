@@ -4,7 +4,7 @@ OBJS = main.o router.o networking/socket.o state.o routes/lobby.o logic/lobby.o
 OBJS += routes/ping.o routes/error.o ../common/networking/translate.o
 OBJS += ../common/protocol/protocol_messages.o ../common/networking/fetch.o
 OBJS += ../common/logic/math.o
-CFLAGS = 
+CFLAGS = -g
 
 # Make actions
 all: ${PROG}
