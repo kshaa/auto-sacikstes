@@ -11,6 +11,9 @@
 typedef struct {
     SDL_Renderer *renderer;
     SDL_Window *window;
+    int oldWidth;
+    int oldHeight;
+    int resized;
 } App;
 
 // Player
@@ -31,6 +34,8 @@ typedef struct {
 
 // SDL Game scene
 typedef struct {
+    int decorationCount;
+    SceneWall * decorations;
     int wallCount;
     SceneWall * walls;
 } Scene;

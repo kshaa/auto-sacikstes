@@ -18,14 +18,19 @@ void runGame() {
     atexit(stopSDL);
 
     // Game loop
+    int resizedRecently = app.resized;
     while (1) {
-        // Input engine
+        // === Input engine
         registerInput();
+        if (app.resized) {
+            resizedRecently = app.resized;
+            app.resized = 0;
+        }
 
-        // Networking engine
+        // === Networking engine
         // Send input
 
-        // Physics engine
+        // === Physics engine
         // if (controls.up) {
         //     printf("Up");
         // }
@@ -42,34 +47,13 @@ void runGame() {
         //     printf("Right");
         // }
 
-        // Scene engine
-        // SDL_Rect car = malloc(sizeof(car));
-        // cars[0].x = player.x;
-        // cars[0].y = player.y;
-        // car.w = 100;
-        // car.h = 100;
-
-        // Render engine
-
-        // Background
-        SDL_SetRenderDrawColor(app.renderer, BACKGROUND_R, BACKGROUND_G, BACKGROUND_B, 255);
-        SDL_RenderClear(app.renderer);
-
-        // Walls
-        for (int i = 0; i < scene.wallCount; i++) {
-            if (scene.walls[i].type == STARTWALL) {
-                SDL_SetRenderDrawColor(app.renderer, STARTWALL_R, STARTWALL_G, STARTWALL_B, 255);
-            } else {
-                SDL_SetRenderDrawColor(app.renderer, EXTRAWALL_R, EXTRAWALL_G, EXTRAWALL_B, 255);
-            }
-            SDL_RenderFillRect(app.renderer, &scene.walls[i].rect);
+        // === Scene engine
+        if (resizedRecently) {
+            resizeScene();
         }
 
-        // Car
-        // for (int i = 0; i < carsCount; i++) {
-        //     SDL_SetRenderDrawColor(app.renderer, 0, 255, 0, 255);
-        //     SDL_RenderFillRect(app.renderer, &cars[i]);
-        // }
+        // === Render engine
+        renderScene();
 
         SDL_RenderPresent(app.renderer);
         SDL_Delay(4);

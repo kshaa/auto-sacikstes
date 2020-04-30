@@ -7,6 +7,9 @@
 enum WALL_TYPE {
     STARTWALL = 0,
     EXTRAWALL = 1,
+    DECORATION_BG = 2,
+    DECORATION_A = 3,
+    DECORATION_B = 4
 };
 
 typedef struct {
@@ -16,5 +19,7 @@ typedef struct {
 } SceneWall;
 
 void initScene();
+void resizeScene();
+void renderScene();
 
 #endif

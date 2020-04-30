@@ -20,6 +20,8 @@ int initState() {
 
     // Prepare app
     memset(&app, 0, sizeof(App));
+    app.oldWidth = INITIAL_SCREEN_WIDTH;
+    app.oldHeight = INITIAL_SCREEN_HEIGHT;
 
     // Prepare game
     memset(&game, 0, sizeof(Game));

@@ -24,16 +24,29 @@
 #define MAX_GAME_WALLS 1000
 
 // Color configs
-#define BACKGROUND_R 255
-#define BACKGROUND_G 255
-#define BACKGROUND_B 255
+#define BACKGROUND_R 50
+#define BACKGROUND_G 50
+#define BACKGROUND_B 50
 
-#define STARTWALL_R 128
-#define STARTWALL_G 128
-#define STARTWALL_B 128
+#define STARTWALL_R 0
+#define STARTWALL_G 255
+#define STARTWALL_B 0
+#define STARTWALL_A 70
 
 #define EXTRAWALL_R 0
 #define EXTRAWALL_G 0
 #define EXTRAWALL_B 0
+
+#define DECORATION_BG_R 255
+#define DECORATION_BG_G 255
+#define DECORATION_BG_B 255
+
+#define DECORATION_A_R 200
+#define DECORATION_A_G 200
+#define DECORATION_A_B 200
+
+#define DECORATION_B_R 240
+#define DECORATION_B_G 240
+#define DECORATION_B_B 240
 
 #endif

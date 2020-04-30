@@ -1,5 +1,6 @@
 #include "scene.h"
 #include "state.h"
+#include "../common/logic/math.h"
 #include "SDL2/SDL.h"
 
 int getOnscreenBlockSize() {
@@ -51,14 +52,29 @@ int transformY(int y) {
     return getOffsetY() + getOnscreenBlockSize() * y;
 }
 
-int scenifyLine(SceneWall * wall, ProtocolLine * line) {
+void retransformWall(SceneWall * wall) {
+    ProtocolLine * line = &wall->line;
     int block = getOnscreenBlockSize();
 
-    memcpy(&wall->line, line, sizeof(ProtocolLine));
     wall->rect.x = transformX(line->beggining.x);
     wall->rect.y = transformY(line->beggining.y);
     wall->rect.w = block * (line->end.x - line->beggining.x + 1);
     wall->rect.h = block * (line->end.y - line->beggining.y + 1);
+}
+
+int scenifyLine(SceneWall * wall, ProtocolLine * line, int type) {
+    memcpy(&wall->line, line, sizeof(ProtocolLine));
+    wall->type = type;
+    retransformWall(wall);
+}
+
+void resizeScene() {
+    for (int i = 0; i < scene.decorationCount; i++) {
+        retransformWall(&scene.decorations[i]);
+    }
+    for (int i = 0; i < scene.wallCount; i++) {
+        retransformWall(&scene.walls[i]);
+    }
 }
 
 void initScene() {
@@ -67,13 +83,28 @@ void initScene() {
     int sceneHeight = 0;
     SDL_GetWindowSize(app.window, &sceneWidth, &sceneHeight);
 
+    // Init decorations
+    scene.decorationCount = 1 + game.field.info.width * game.field.info.height;
+    scene.decorations = malloc(scene.decorationCount * sizeof(SceneWall));
+    ProtocolLine tmpline;
+    storeLine(&tmpline, 0, 0, game.field.info.width - 1, game.field.info.height - 1);
+    scenifyLine(&scene.decorations[0], &tmpline, DECORATION_BG);
+    for (int i = 0; i < game.field.info.width * game.field.info.height; i++) {
+        int x = i % game.field.info.width;
+        int y = i / game.field.info.width;
+        int odd = (x + y) % 2 == 0;
+        int type = odd ? DECORATION_A : DECORATION_B;
+        storeLine(&tmpline, (float)x, (float)y, (float)x, (float)y);
+        scenifyLine(&scene.decorations[i + 1], &tmpline, type);
+    }
+
     // Init walls
     scene.wallCount = game.field.extraLinesCount + 1;
     scene.walls = malloc(scene.wallCount * sizeof(SceneWall));
 
-    scenifyLine(&scene.walls[0], &game.field.startLine);
+    scenifyLine(&scene.walls[0], &game.field.startLine, STARTWALL);
     for (int i = 0; i < game.field.extraLinesCount; i++) {
-        scenifyLine(&scene.walls[i + 1], &game.field.extraLines[i]);
+        scenifyLine(&scene.walls[i + 1], &game.field.extraLines[i], EXTRAWALL);
     }
 
     // // Init cars
@@ -85,5 +116,77 @@ void initScene() {
     //     cars[i].y = 100;
     //     cars[i].w = 100;
     //     cars[i].h = 100;
+    // }
+}
+
+void renderRect(SDL_Rect * rect, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+    SDL_SetRenderDrawColor(app.renderer, r, g, b, a);
+    SDL_RenderFillRect(app.renderer, rect);
+}
+
+void getTypeColor(int type, uint8_t * r, uint8_t * g, uint8_t * b, uint8_t * a) {
+    switch (type) {
+        case (STARTWALL):
+            *r = STARTWALL_R;
+            *g = STARTWALL_G;
+            *b = STARTWALL_B;
+            *a = STARTWALL_A;
+            break;
+
+        case (EXTRAWALL):
+            *r = EXTRAWALL_R;
+            *g = EXTRAWALL_G;
+            *b = EXTRAWALL_B;
+            break;
+
+        case (DECORATION_BG):
+            *r = DECORATION_BG_R;
+            *g = DECORATION_BG_G;
+            *b = DECORATION_BG_B;
+            break;
+
+        case (DECORATION_A):
+            *r = DECORATION_A_R;
+            *g = DECORATION_A_G;
+            *b = DECORATION_A_B;
+            break;
+        
+        case (DECORATION_B):
+            *r = DECORATION_B_R;
+            *g = DECORATION_B_G;
+            *b = DECORATION_B_B;
+            break;
+    }
+}
+
+void renderWall(SceneWall * wall) {
+    uint8_t r = 0;
+    uint8_t g = 0;
+    uint8_t b = 0;
+    uint8_t a = 255;
+    getTypeColor(wall->type, &r, &g, &b, &a);
+    renderRect(&wall->rect, r, g, b, a);
+}
+
+void renderScene() {
+    // Background
+    SDL_SetRenderDrawColor(app.renderer, BACKGROUND_R, BACKGROUND_G, BACKGROUND_B, 255);
+    SDL_RenderClear(app.renderer);
+
+    // Decorations
+    for (int i = 0; i < scene.decorationCount; i++) {
+        if (i == 0) continue;
+        renderWall(&scene.decorations[i]);
+    }
+
+    // Walls
+    for (int i = 0; i < scene.wallCount; i++) {
+        renderWall(&scene.walls[i]);
+    }
+
+    // Car
+    // for (int i = 0; i < carsCount; i++) {
+    //     SDL_SetRenderDrawColor(app.renderer, 0, 255, 0, 255);
+    //     SDL_RenderFillRect(app.renderer, &cars[i]);
     // }
 }

@@ -49,7 +49,16 @@ void registerInput() {
         switch (event.type) {
             case SDL_QUIT:
                 exit(0);
-                break;
+
+            // For some reason doesn't work
+            // case SDL_WINDOWEVENT:
+            //     switch (event.window.type) {
+            //         case SDL_WINDOWEVENT_SIZE_CHANGED:
+            //         case SDL_WINDOWEVENT_RESIZED:
+            //             app.resized = 1;
+            //             break;
+            //     }
+            //     break;
 
             case SDL_KEYDOWN:
                 registerKeyDown(&event.key);
@@ -62,5 +71,15 @@ void registerInput() {
             default:
                 break;
         }
+    }
+
+    // Hack to track window resize changes
+    int sceneWidth = 0;
+    int sceneHeight = 0;
+    SDL_GetWindowSize(app.window, &sceneWidth, &sceneHeight);
+    if (sceneWidth != app.oldWidth || sceneHeight != app.oldHeight) {
+        app.resized = 1;
+        app.oldWidth = sceneWidth;
+        app.oldHeight = sceneHeight;
     }
 }
