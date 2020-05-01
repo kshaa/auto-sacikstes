@@ -80,7 +80,7 @@ const char usageFormat[] =
     "   -j [ID] Join game with ID\n"
     "   -k Send keep-alive i.e. ping to server\n"
     "Parameter flags:\n"
-    "   -u [NAME] Player name for created game\n\n"
+    "   -u [NAME] Player name for created game\n"
     "   -f [ID] Field id for created game\n\n"
 
     "Parameter flags are additions to action flags\n"
