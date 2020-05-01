@@ -8,7 +8,7 @@
 unsigned char sendBuff[COMMON_SEND_BUFF_SIZE];
 unsigned char recvBuff[COMMON_SEND_BUFF_SIZE];
 int loadSendBuff(void * buff, size_t buffSize) {
-    if (buffSize >= COMMON_SEND_BUFF_SIZE) {
+    if (buffSize > COMMON_SEND_BUFF_SIZE) {
         fprintf(stderr, "[network] Can't send request with buffer exceeding default size\n");
         return 0;
     }

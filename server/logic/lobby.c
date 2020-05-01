@@ -52,18 +52,19 @@ int createGame(char * gameName, int fieldID) {
     int width = 30;
     game->field.info.width = width;
     game->field.info.height = height;
-    storeLine(&game->field.startLine, 10, 2, 10, 10);
-    game->field.extraLinesCount = 4;
-    game->field.extraLines = malloc(sizeof(ProtocolLine) * 4);
+    storeLine(&game->field.startLine, 14, 1, 14, 9);
+    game->field.extraLinesCount = 5;
+    game->field.extraLines = malloc(sizeof(ProtocolLine) * game->field.extraLinesCount);
     // top
     storeLine(&game->field.extraLines[0], 0, 0, width - 1, 0);
     // bottom
     storeLine(&game->field.extraLines[1], 0, height - 1, width - 1, height - 1);
     // left
     storeLine(&game->field.extraLines[2], 0, 0, 0, height - 1);
-    // left
+    // right
     storeLine(&game->field.extraLines[3], width - 1, 0, width - 1, height - 1);
-
+    // middle
+    storeLine(&game->field.extraLines[4], 7, 10, 22, 10);
     return gameID;
 }
 

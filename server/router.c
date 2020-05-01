@@ -76,10 +76,14 @@ int routeTraffic(int connectionfd) {
 
     // Send message
     printf("[router] Responding to connection %d regarding route %s\n", connectionfd, getVolatilePrintableResponseType(recvBuff));
-    int sendSuccess = sendMessage(connectionfd, sendBuff, sizeof(sendBuff), MSG_DONTWAIT);
+    int sendSuccess = sendMessage(connectionfd, sendBuff, SEND_BUFF_SIZE, MSG_DONTWAIT);
     if (!sendSuccess) {
         success = 0;
-        fprintf(stderr, "[router] Sending response failed for connection %d: %s\n", connectionfd, strerror(errno));
+        if (errno != 0) {
+            fprintf(stderr, "[router] Sending response failed for connection %d: %s\n", connectionfd, strerror(errno));
+        } else {
+            fprintf(stderr, "[router] Sending response failed for connection %d\n", connectionfd);
+        }
     }
     
     return success;
