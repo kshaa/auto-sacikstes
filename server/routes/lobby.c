@@ -47,6 +47,7 @@ int routeGameList(int connfd, char * recvBuff, size_t sendBuffSize, char * sendB
 
 int routeGameCreate(int connfd, char * recvBuff, size_t sendBuffSize, unsigned char * sendBuff) {
     int gamesCount = getGameCount();
+    int fieldsCount = 1; // Temporarily hardcoded
     int canSend = sizeof(ProtocolCreateGameResponse) <= sendBuffSize;
     if (!canSend) {
         return 0;
@@ -56,7 +57,7 @@ int routeGameCreate(int connfd, char * recvBuff, size_t sendBuffSize, unsigned c
     ProtocolCreateGameRequest * request = (ProtocolCreateGameRequest *) recvBuff;
 
     // Check if the field is valid
-    if (request->fieldID < 1 || request->fieldID > gamesCount) {
+    if (request->fieldID < 1 || request->fieldID > fieldsCount) {
         // Todo: send error response
         routeError(connfd, recvBuff, sizeof(sendBuff), sendBuff, PROTOCOL_ERROR_CODE_INCORRECT_FIELD_ID);
         return 1;

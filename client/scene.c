@@ -78,6 +78,8 @@ void resizeScene() {
 }
 
 void initScene() {
+    ProtocolLine tmpline;
+
     // Get scene info
     int sceneWidth = 0;
     int sceneHeight = 0;
@@ -86,7 +88,6 @@ void initScene() {
     // Init decorations
     scene.decorationCount = 1 + game.field.info.width * game.field.info.height;
     scene.decorations = malloc(scene.decorationCount * sizeof(SceneWall));
-    ProtocolLine tmpline;
     storeLine(&tmpline, 0, 0, game.field.info.width - 1, game.field.info.height - 1);
     scenifyLine(&scene.decorations[0], &tmpline, DECORATION_BG);
     for (int i = 0; i < game.field.info.width * game.field.info.height; i++) {
@@ -107,16 +108,24 @@ void initScene() {
         scenifyLine(&scene.walls[i + 1], &game.field.extraLines[i], EXTRAWALL);
     }
 
-    // // Init cars
-    // carsCount = 2;
-    // cars = malloc(carsCount * sizeof(SDL_Rect));
+    // Init cars
+    int playerCount = getGamePlayerCount();
+    scene.carsCount = playerCount;
+    scene.cars = malloc(scene.carsCount * sizeof(SceneWall));
 
-    // for (int i = 0; i < carsCount; i++) {
-    //     cars[i].x = 100*2*i;
-    //     cars[i].y = 100;
-    //     cars[i].w = 100;
-    //     cars[i].h = 100;
-    // }
+    int lastPlayer = 0;
+    for (int i = 0; i < MAX_GAME_PLAYERS; i++) {
+        if (!game.player[i].created) {
+            continue;
+        }
+
+        float x = game.player[i].info.position.x - 1;
+        float y = game.player[i].info.position.y - 0.5;
+        storeLine(&tmpline, x, y, x + 1, y);
+        scenifyLine(&scene.cars[i], &tmpline, SCENECAR);
+
+        lastPlayer++;
+    }
 }
 
 void renderRect(SDL_Rect * rect, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
@@ -156,6 +165,12 @@ void getTypeColor(int type, uint8_t * r, uint8_t * g, uint8_t * b, uint8_t * a) 
             *g = DECORATION_B_G;
             *b = DECORATION_B_B;
             break;
+
+        case (SCENECAR):
+            *r = SCENECAR_R;
+            *g = SCENECAR_G;
+            *b = SCENECAR_B;
+            break;
     }
 }
 
@@ -184,9 +199,8 @@ void renderScene() {
         renderWall(&scene.walls[i]);
     }
 
-    // Car
-    // for (int i = 0; i < carsCount; i++) {
-    //     SDL_SetRenderDrawColor(app.renderer, 0, 255, 0, 255);
-    //     SDL_RenderFillRect(app.renderer, &cars[i]);
-    // }
+    // Cars
+    for (int i = 0; i < scene.carsCount; i++) {
+        renderWall(&scene.cars[i]);
+    }
 }

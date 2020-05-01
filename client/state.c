@@ -41,3 +41,13 @@ int initConnection() {
         return 1;
     }
 }
+
+int getGamePlayerCount() {
+    int count = 0;
+    for (int i = 0; i < MAX_GAME_PLAYERS; i++) {
+        if (game.player[i].created) {
+            count++;
+        }
+    }
+    return count;
+}

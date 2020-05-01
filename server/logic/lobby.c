@@ -71,6 +71,7 @@ int createGame(char * gameName, int fieldID) {
 int addGamePlayer(int gameID, char * playerName, int connectionfd) {
     Game * game = &games[gameID];
     int playerID = -1;
+    int playerCount = getGamePlayerCount(gameID);
 
     // Find free slot
     for (int i = 0; i < MAX_GAME_PLAYERS; i++) {
@@ -95,8 +96,13 @@ int addGamePlayer(int gameID, char * playerName, int connectionfd) {
     player->info.id = playerID;
     strncpy(player->info.name, playerName, PROTOCOL_MAX_PLAYER_NAME);
 
-    // // Hardcoded player positions
+    // Hardcoded player positions
+    float firstX = 13;
+    float firstY = 8.5;
+    float offset = 2;
+    float x = firstX;
+    float y = firstY + offset * playerCount;
+    storeCoordinate(&player->info.position, x, y);
     
-
     return playerID;
 }

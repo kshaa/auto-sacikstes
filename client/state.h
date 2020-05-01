@@ -38,6 +38,8 @@ typedef struct {
     SceneWall * decorations;
     int wallCount;
     SceneWall * walls;
+    int carsCount;
+    SceneWall * cars;
 } Scene;
 
 // Global state
@@ -51,5 +53,8 @@ int initState();
 
 // Initialize server connection
 int initConnection();
+
+// Get player count
+int getGamePlayerCount();
 
 #endif

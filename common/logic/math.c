@@ -1,11 +1,14 @@
 #include "../protocol/protocol_types.h"
 #include <stdio.h>
 
+void storeCoordinate(ProtocolCoordinates * coords, float x, float y) {
+    coords->x = x;
+    coords->y = y;
+}
+
 void storeLine(ProtocolLine * line, float ax, float ay, float bx, float by) {
-    line->beggining.x = ax;
-    line->beggining.y = ay;
-    line->end.x = bx;
-    line->end.y = by;
+    storeCoordinate(&line->beggining, ax, ay);
+    storeCoordinate(&line->end, bx, by);
 }
 
 void printLine(ProtocolLine * line) {

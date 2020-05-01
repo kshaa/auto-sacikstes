@@ -306,7 +306,7 @@ int main(int argc, char *argv[]) {
         // Store players in global storage
         for (int i = 0; i < startGameResponse.playerInfoCount; i++) {
             game.player[i].created = 1;
-            memcpy(&game.player[i].info, &startGameResponse.playerInfos[i], sizeof(Field));
+            memcpy(&game.player[i].info, &startGameResponse.playerInfos[i], sizeof(ProtocolPlayerInfo));
         }
 
         // Start the game

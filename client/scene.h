@@ -9,7 +9,8 @@ enum WALL_TYPE {
     EXTRAWALL = 1,
     DECORATION_BG = 2,
     DECORATION_A = 3,
-    DECORATION_B = 4
+    DECORATION_B = 4,
+    SCENECAR = 5
 };
 
 typedef struct {

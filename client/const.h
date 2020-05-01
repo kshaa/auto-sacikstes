@@ -49,4 +49,8 @@
 #define DECORATION_B_G 240
 #define DECORATION_B_B 240
 
+#define SCENECAR_R 128
+#define SCENECAR_G 0
+#define SCENECAR_B 128
+
 #endif

@@ -75,7 +75,7 @@ int routeTraffic(int connectionfd) {
     }
 
     // Send message
-    printf("[router] Responding to connection %d regarding route %s\n", connectionfd, getVolatilePrintableResponseType(recvBuff));
+    printf("[router] Responding to connection %d with %s regarding route %s\n", connectionfd, getVolatilePrintableResponseType(sendBuff), getVolatilePrintableResponseType(recvBuff));
     int sendSuccess = sendMessage(connectionfd, sendBuff, SEND_BUFF_SIZE, MSG_DONTWAIT);
     if (!sendSuccess) {
         success = 0;
