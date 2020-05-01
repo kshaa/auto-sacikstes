@@ -32,6 +32,7 @@ typedef struct {
 // Error codes
 extern char PROTOCOL_ERROR_CODE_INCORRECT_TYPE[2];
 extern char PROTOCOL_ERROR_CODE_SERVER_IS_SAD[2];
+extern char PROTOCOL_ERROR_CODE_INCORRECT_FIELD_ID[2];
 int isErrorCode(char * a, char * b);
 char * getVolatileErrorMessage(char errorCode[2]);
 

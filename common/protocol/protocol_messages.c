@@ -38,6 +38,7 @@ char PROTOCOL_ERROR_TYPE[] = { 'E', 'R' };
 // Error codes
 char PROTOCOL_ERROR_CODE_INCORRECT_TYPE[] = { 'I', 'T' };
 char PROTOCOL_ERROR_CODE_SERVER_IS_SAD[] = { 'S', 'S' };
+char PROTOCOL_ERROR_CODE_INCORRECT_FIELD_ID[] = { 'F', 'I' };
 int isErrorCode(char * a, char * b) {
     return strncmp(a, b, 2) == 0;
 }
@@ -46,12 +47,15 @@ int isErrorCode(char * a, char * b) {
 #define MAX_MESSAGE_SIZE 256
 char PROTOCOL_ERROR_MESSAGE_INCORRECT_TYPE[MAX_MESSAGE_SIZE] = "Unknown request type";
 char PROTOCOL_ERROR_MESSAGE_SERVER_IS_SAD[MAX_MESSAGE_SIZE] = "Server is sad";
+char PROTOCOL_ERROR_MESSAGE_INCORRECT_FIELD_ID[MAX_MESSAGE_SIZE] = "Incorrect field ID";
 char PROTOCOL_ERROR_MESSAGE_UNKNOWN[MAX_MESSAGE_SIZE] = "Unknown error code";
 char * getVolatileErrorMessage(char errorCode[2]) {
     if (isErrorCode(errorCode, PROTOCOL_ERROR_CODE_INCORRECT_TYPE)) {
         return PROTOCOL_ERROR_MESSAGE_INCORRECT_TYPE;
     } else if (isErrorCode(errorCode, PROTOCOL_ERROR_CODE_SERVER_IS_SAD)) {
         return PROTOCOL_ERROR_MESSAGE_SERVER_IS_SAD;
+    } else if (isErrorCode(errorCode, PROTOCOL_ERROR_CODE_INCORRECT_FIELD_ID)) {
+        return PROTOCOL_ERROR_MESSAGE_INCORRECT_FIELD_ID;
     }
 
     return PROTOCOL_ERROR_MESSAGE_UNKNOWN;

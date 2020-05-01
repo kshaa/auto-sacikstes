@@ -65,5 +65,5 @@ unsigned char * fetch(int connectionfd, void * buff, size_t buffSize) {
 }
 
 int isConnectionBroken(int err) {
-    return err == EPIPE;
+    return err == EPIPE || err == ECONNRESET;
 }
