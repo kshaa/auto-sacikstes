@@ -95,5 +95,8 @@ int addGamePlayer(int gameID, char * playerName, int connectionfd) {
     player->info.id = playerID;
     strncpy(player->info.name, playerName, PROTOCOL_MAX_PLAYER_NAME);
 
+    // // Hardcoded player positions
+    
+
     return playerID;
 }

@@ -63,7 +63,7 @@ int routeTraffic(int connectionfd) {
 
     // Generate server internal error message if needed
     if (!success) {
-        fprintf(stderr, "[router] Message route failed for connection %d: %s\n", connectionfd, strerror(errno));
+        fprintf(stderr, "[router] Message route failed for connection %d\n", connectionfd);
         fprintf(stderr, "[router] Routing to error w/ internal server error\n");
         success = routeError(connectionfd, recvBuff, sizeof(sendBuff), sendBuff, PROTOCOL_ERROR_CODE_SERVER_IS_SAD);
         
@@ -79,11 +79,7 @@ int routeTraffic(int connectionfd) {
     int sendSuccess = sendMessage(connectionfd, sendBuff, SEND_BUFF_SIZE, MSG_DONTWAIT);
     if (!sendSuccess) {
         success = 0;
-        if (errno != 0) {
-            fprintf(stderr, "[router] Sending response failed for connection %d: %s\n", connectionfd, strerror(errno));
-        } else {
-            fprintf(stderr, "[router] Sending response failed for connection %d\n", connectionfd);
-        }
+        fprintf(stderr, "[router] Sending response failed for connection %d\n", connectionfd);
     }
     
     return success;
@@ -105,7 +101,8 @@ int handleTraffic() {
         // Kill dead connection
         if (!success && isConnectionBroken(errno)) {
             connectionfds[i] = CLOSED_CONNECTION;
-            fprintf(stderr, "[traffic] Connection with %d seems broken, killing it\n", connfd);
+            fprintf(stderr, "[traffic] Connection with %d seems broken, ignoring it\n", connfd);
+            success = 1; // A broken connection isn't a server fault really.
         }
     }; 
 

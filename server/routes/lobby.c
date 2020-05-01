@@ -6,6 +6,7 @@
 #include "../state.h"
 #include <stdio.h>
 #include "../logic/lobby.h"
+#include "./error.h"
 
 int routeFieldList(int connfd, char * recvBuff, size_t sendBuffSize, char * sendBuff) {
     // Generate response
@@ -54,16 +55,23 @@ int routeGameCreate(int connfd, char * recvBuff, size_t sendBuffSize, unsigned c
     // Parse request
     ProtocolCreateGameRequest * request = (ProtocolCreateGameRequest *) recvBuff;
 
+    // Check if the field is valid
+    if (request->fieldID < 1 || request->fieldID > gamesCount) {
+        // Todo: send error response
+        routeError(connfd, recvBuff, sizeof(sendBuff), sendBuff, PROTOCOL_ERROR_CODE_INCORRECT_FIELD_ID);
+        return 1;
+    }
+
     // Create game
     int gameID = createGame(request->gameName, request->fieldID);
     if (gameID == -1) {
-        // Todo: Send error response
+        return 0;
     }
 
     // Add game creator player
     int playerID = addGamePlayer(gameID, request->playerName, connfd);
     if (playerID == -1) {
-        // Todo: Send error response
+        return 0;
     }
 
     // Generate response
