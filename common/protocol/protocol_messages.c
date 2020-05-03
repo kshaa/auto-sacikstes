@@ -111,6 +111,10 @@ char PROTOCOL_CREATE_GAME_TYPE[] = { 'C', 'G' };
 
 // Start game
 char PROTOCOL_START_GAME_TYPE[] = { 'S', 'G' };
+
+// Join game
+char PROTOCOL_JOIN_GAME_TYPE[] = { 'J', 'G' };
+
 void unserializeProtocolStartGameResponse(unsigned char * buff, size_t buffSize, ProtocolStartGameResponse * response) {
     // Check if the buff is way too small
     if (buffSize < sizeof(ProtocolStartGameResponse)) {
@@ -120,6 +124,7 @@ void unserializeProtocolStartGameResponse(unsigned char * buff, size_t buffSize,
     // Unserialize type
     strncpy(response->type, buff, 2);
     // Unserialize playerInfoCount
+    printf("[TEMPORARY] Player count after receiving response: %d\n", ((ProtocolStartGameResponse *)buff)->playerInfoCount);
     response->playerInfoCount = ((ProtocolStartGameResponse *)buff)->playerInfoCount;
     // Unserialize playerInfos
     response->playerInfos = malloc(response->playerInfoCount * sizeof(ProtocolPlayerInfo));

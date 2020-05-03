@@ -123,6 +123,49 @@ int createGame(ProtocolCreateGameResponse * buff, char * gameName, char * player
     }
 }
 
+int joinGame(ProtocolJoinGameResponse * buff, int gameID, char * playerName)
+{
+    int success = 1;
+
+    // Use connection from global client state
+    int connectionfd = server.fd;
+
+    // Generate request
+    ProtocolJoinGameRequest request;
+    strncpy(request.type, PROTOCOL_JOIN_GAME_TYPE, sizeof(PROTOCOL_JOIN_GAME_TYPE));
+    strncpy(request.playerName, playerName, sizeof(PROTOCOL_MAX_PLAYER_NAME));
+
+    request.gameID = gameID;
+
+    // Send request
+    unsigned char * recvBuff = fetch(connectionfd, &request, sizeof(ProtocolJoinGameRequest));
+    if (!recvBuff) {
+        if (DEBUG) printf("[joingame] Join game request failed\n");
+        success = 0;
+        return success;
+    }
+
+    // Process response
+    printf("[joingame] Received: %s\n", getVolatilePrintableResponseType(recvBuff));
+    fflush(stdout);
+    if (isMessageType(recvBuff, PROTOCOL_JOIN_GAME_TYPE)) {
+        // Request success
+        memcpy(buff, recvBuff, sizeof(ProtocolJoinGameResponse));
+        return success;
+    } else {
+        // Request error
+        if (isMessageType(recvBuff, PROTOCOL_ERROR_TYPE)) {
+            ProtocolErrorResponse * error = (ProtocolErrorResponse *) recvBuff;
+            if (DEBUG) printf("[joingame] Join game failed w/ error: %s\n", getVolatileErrorMessage(error->errorCode));
+        } else {
+            if (DEBUG) printf("[joingame] Join game failed w/ unknown error\n");
+        }
+
+        success = 0;
+        return success;
+    }
+}
+
 int startGame(ProtocolStartGameResponse * buff, int gameID, char * playerPassword) {
     int success = 1;
 
@@ -154,9 +197,9 @@ int startGame(ProtocolStartGameResponse * buff, int gameID, char * playerPasswor
         // Request error
         if (isMessageType(recvBuff, PROTOCOL_ERROR_TYPE)) {
             ProtocolErrorResponse * error = (ProtocolErrorResponse *) recvBuff;
-            if (DEBUG) printf("[startgame] List games failed w/ error: %s\n", getVolatileErrorMessage(error->errorCode));
+            if (DEBUG) printf("[startgame] Start game failed w/ error: %s\n", getVolatileErrorMessage(error->errorCode));
         } else {
-            if (DEBUG) printf("[startgame] List games failed w/ unknown error\n");
+            if (DEBUG) printf("[startgame] Start game failed w/ unknown error\n");
         }
 
         success = 0;

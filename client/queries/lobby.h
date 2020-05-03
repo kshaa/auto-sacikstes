@@ -7,6 +7,7 @@
 int getFieldCount(ProtocolListFieldsResponse * buff);
 int getGameIDs(ProtocolListGamesResponse * buff, int copyOnlyCount);
 int createGame(ProtocolCreateGameResponse * buff, char * gameName, char * playerName, int fieldID);
+int joinGame(ProtocolJoinGameResponse * buff, int gameID, char * playerName);
 int startGame(ProtocolStartGameResponse * buff, int gameID, char * playerPassword);
 
 #endif

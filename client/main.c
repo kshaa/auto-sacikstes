@@ -312,7 +312,29 @@ int main(int argc, char *argv[]) {
         // Start the game
         runGame();
     } else if (joinGameFlag) {
+        // Join game
         printf("[client] Joining game w/ ID: %d\n", inputGameID);
+
+        ProtocolJoinGameResponse joinGameResponse;
+        int joinGameSuccess = joinGame(&joinGameResponse, inputGameID, inputPlayerName);
+        if (!joinGameSuccess) {
+            fprintf(stderr, "[client] Failed to join game\n");
+            return 1;
+        }
+
+        // Debug sent lines
+        if (DEBUG) {
+            printf(
+                "[client] Joined game! Game ID: %d, player ID: %d, player password: %s\n",
+                inputGameID,
+                joinGameResponse.playerID,
+                joinGameResponse.playerPassword
+            );
+        }
+        
+        printf("[TEMPORARY] Press enter to start the game!\n");
+        getchar();
+
         runGame();
     }
 

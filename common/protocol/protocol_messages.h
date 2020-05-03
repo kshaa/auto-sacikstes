@@ -92,4 +92,17 @@ typedef struct {
 void unserializeProtocolStartGameResponse(unsigned char * buff, size_t buffSize, ProtocolStartGameResponse * response);
 void serializeProtocolStartGameResponse(ProtocolStartGameResponse * response, unsigned char * buff, size_t buffSize);
 
+// Join game
+extern char PROTOCOL_JOIN_GAME_TYPE[2];
+typedef struct {
+    char type[2];
+    int gameID;
+    char playerName[PROTOCOL_MAX_PLAYER_NAME];
+} ProtocolJoinGameRequest;
+typedef struct {
+    char type[2];
+    int playerID;
+    char playerPassword[PROTOCOL_MAX_PASSWORD_LENGTH];
+} ProtocolJoinGameResponse;
+
 #endif

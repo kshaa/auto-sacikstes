@@ -90,7 +90,7 @@ int addGamePlayer(int gameID, char * playerName, int connectionfd) {
     Player * player = &game->player[playerID];
     player->created = 1;
     player->connectionfd = connectionfd;
-    randomAlphanumeric(player->password, PROTOCOL_MAX_PLAYER_NAME - 1);
+    randomAlphanumeric(player->password, PROTOCOL_MAX_PASSWORD_LENGTH - 1);
 
     // Initialize player info
     player->info.id = playerID;
@@ -104,5 +104,20 @@ int addGamePlayer(int gameID, char * playerName, int connectionfd) {
     float y = firstY + offset * playerCount;
     storeCoordinate(&player->info.position, x, y);
     
+    return playerID;
+}
+
+
+int joinGame(int gameID, char * playerName, int connectionfd) {
+    // TODO: send error response
+    // Check if game is waiting for players
+    Game * game = &games[gameID];
+    if (game->created != 1 || game->info.status != WAITING_PLAYERS)
+    {
+        return -1;
+    }
+
+    // Add requested player to game
+    int playerID = addGamePlayer(gameID, playerName, connectionfd);
     return playerID;
 }

@@ -49,10 +49,13 @@ int routeTraffic(int connectionfd) {
         success = routeFieldList(connectionfd, recvBuff, sizeof(sendBuff), sendBuff);
     } else if (isMessageType(recvBuff, PROTOCOL_LIST_GAMES_TYPE)) {
         printf("[router] Routing to lobby game list\n");
-        success = routeGameList(connectionfd, recvBuff, sizeof(sendBuff), sendBuff);
+        success = routeListGame(connectionfd, recvBuff, sizeof(sendBuff), sendBuff);
     } else if (isMessageType(recvBuff, PROTOCOL_CREATE_GAME_TYPE)) {
         printf("[router] Routing to lobby create game\n");
-        success = routeGameCreate(connectionfd, recvBuff, sizeof(sendBuff), sendBuff);
+        success = routeCreateGame(connectionfd, recvBuff, sizeof(sendBuff), sendBuff);
+    } else if (isMessageType(recvBuff, PROTOCOL_JOIN_GAME_TYPE)) {
+        printf("[router] Routing to lobby join game\n");
+        success = routeJoinGame(connectionfd, recvBuff, sizeof(sendBuff), sendBuff);
     } else if (isMessageType(recvBuff, PROTOCOL_START_GAME_TYPE)) {
         printf("[router] Routing to lobby start game\n");
         success = routeStartGame(connectionfd, recvBuff, sizeof(sendBuff), sendBuff);
