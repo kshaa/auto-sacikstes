@@ -101,7 +101,7 @@ int addGamePlayer(int gameID, char * playerName, int connectionfd) {
     float firstY = 8.5;
     float offset = 2;
     float x = firstX;
-    float y = firstY + offset * playerCount;
+    float y = firstY - offset * playerCount;
     storeCoordinate(&player->info.position, x, y);
     
     return playerID;

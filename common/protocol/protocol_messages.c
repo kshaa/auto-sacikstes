@@ -161,7 +161,7 @@ void serializeProtocolStartGameResponse(ProtocolStartGameResponse * response, un
     // Serialize playerInfos & field
     for (int i = 0; i < response->playerInfoCount; i++) {
         unsigned char * playerInfosOffset = buff + sizeof(char) * 2 + sizeof(int);
-        unsigned char * nthPlayerInfoOffset = playerInfosOffset + i;
+        unsigned char * nthPlayerInfoOffset = playerInfosOffset + i * sizeof(ProtocolPlayerInfo);
         memcpy(nthPlayerInfoOffset, &response->playerInfos[i], sizeof(ProtocolPlayerInfo));
     }
     // Serialize field info
