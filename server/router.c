@@ -13,6 +13,7 @@
 
 int routeTraffic(int connectionfd) {
     int success = 1;
+    int globalFlag = 0;
 
     // Receive incoming message
     errno = 0;
@@ -56,9 +57,11 @@ int routeTraffic(int connectionfd) {
     } else if (isMessageType(recvBuff, PROTOCOL_JOIN_GAME_TYPE)) {
         printf("[router] Routing to lobby join game\n");
         success = routeJoinGame(connectionfd, recvBuff, sizeof(sendBuff), sendBuff);
+        // globalFlag = 1;
     } else if (isMessageType(recvBuff, PROTOCOL_START_GAME_TYPE)) {
         printf("[router] Routing to lobby start game\n");
         success = routeStartGame(connectionfd, recvBuff, sizeof(sendBuff), sendBuff);
+        globalFlag = 1;
     } else {
         printf("[router] Routing to error w/ unknown type\n");
         success = routeError(connectionfd, recvBuff, sizeof(sendBuff), sendBuff, PROTOCOL_ERROR_CODE_INCORRECT_TYPE);
@@ -77,12 +80,36 @@ int routeTraffic(int connectionfd) {
         }
     }
 
-    // Send message
-    printf("[router] Responding to connection %d with %s regarding route %s\n", connectionfd, getVolatilePrintableResponseType(sendBuff), getVolatilePrintableResponseType(recvBuff));
-    int sendSuccess = sendMessage(connectionfd, sendBuff, SEND_BUFF_SIZE, MSG_DONTWAIT);
-    if (!sendSuccess) {
-        success = 0;
-        fprintf(stderr, "[router] Sending response failed for connection %d\n", connectionfd);
+    if (globalFlag) {
+        // Send response to all joined players
+        int gameID;
+
+        if (isMessageType(recvBuff, PROTOCOL_START_GAME_TYPE)) {
+            gameID = ((ProtocolStartGameRequest *) recvBuff)->gameID;
+        } else if (isMessageType(recvBuff, PROTOCOL_JOIN_GAME_TYPE)) {
+            gameID = ((ProtocolJoinGameRequest *) recvBuff)->gameID;
+        }
+
+        for (int i = 0; i < MAX_GAME_PLAYERS; i++) {
+            if (games[gameID].player[i].created) {
+                connectionfd = games[gameID].player[i].connectionfd;
+
+                int sendSuccess = sendMessage(connectionfd, sendBuff, SEND_BUFF_SIZE, MSG_DONTWAIT);
+
+                if (!sendSuccess) {
+                    success = 0;
+                    fprintf(stderr, "[router] Sending response failed for connection %d\n", connectionfd);
+                }
+            }
+        }
+    } else {
+        // Send response to requester
+        printf("[router] Responding to connection %d with %s regarding route %s\n", connectionfd, getVolatilePrintableResponseType(sendBuff), getVolatilePrintableResponseType(recvBuff));
+        int sendSuccess = sendMessage(connectionfd, sendBuff, SEND_BUFF_SIZE, MSG_DONTWAIT);
+        if (!sendSuccess) {
+            success = 0;
+            fprintf(stderr, "[router] Sending response failed for connection %d\n", connectionfd);
+        }
     }
     
     return success;
