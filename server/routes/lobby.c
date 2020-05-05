@@ -127,7 +127,6 @@ int routeStartGame(int connfd, char * recvBuff, size_t sendBuffSize, char * send
     ProtocolStartGameResponse response;
     strncpy(response.type, PROTOCOL_START_GAME_TYPE, sizeof(PROTOCOL_START_GAME_TYPE));
     response.playerInfoCount = getGamePlayerCount(request->gameID);
-    printf("[TEMPORARY] Player count before sending response : %d\n", response.playerInfoCount);
     response.playerInfos = malloc(sizeof(ProtocolPlayerInfo) * response.playerInfoCount);
     for (int i = 0; i < response.playerInfoCount; i++) {
         memcpy(&response.playerInfos[i], &games[request->gameID].player[i].info, sizeof(ProtocolPlayerInfo));

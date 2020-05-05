@@ -124,7 +124,6 @@ void unserializeProtocolStartGameResponse(unsigned char * buff, size_t buffSize,
     // Unserialize type
     strncpy(response->type, buff, 2);
     // Unserialize playerInfoCount
-    printf("[TEMPORARY] Player count after receiving response: %d\n", ((ProtocolStartGameResponse *)buff)->playerInfoCount);
     response->playerInfoCount = ((ProtocolStartGameResponse *)buff)->playerInfoCount;
     // Unserialize playerInfos
     response->playerInfos = malloc(response->playerInfoCount * sizeof(ProtocolPlayerInfo));
