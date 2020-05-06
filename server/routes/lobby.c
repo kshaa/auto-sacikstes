@@ -22,7 +22,7 @@ int routeFieldList(int connfd, char * recvBuff, size_t sendBuffSize, char * send
     return 1;
 }
 
-int routeGameList(int connfd, char * recvBuff, size_t sendBuffSize, char * sendBuff) {
+int routeListGame(int connfd, char * recvBuff, size_t sendBuffSize, char * sendBuff) {
     // Generate response
     ProtocolListGamesResponse response;
     strncpy(response.type, PROTOCOL_LIST_GAMES_TYPE, sizeof(PROTOCOL_LIST_GAMES_TYPE));
@@ -45,7 +45,7 @@ int routeGameList(int connfd, char * recvBuff, size_t sendBuffSize, char * sendB
     return 1;
 }
 
-int routeGameCreate(int connfd, char * recvBuff, size_t sendBuffSize, unsigned char * sendBuff) {
+int routeCreateGame(int connfd, char * recvBuff, size_t sendBuffSize, unsigned char * sendBuff) {
     int gamesCount = getGameCount();
     int fieldsCount = 1; // Temporarily hardcoded
     int canSend = sizeof(ProtocolCreateGameResponse) <= sendBuffSize;
@@ -77,10 +77,35 @@ int routeGameCreate(int connfd, char * recvBuff, size_t sendBuffSize, unsigned c
 
     // Generate response
     ProtocolCreateGameResponse response;
-    strncpy(response.type, PROTOCOL_CREATE_GAME_TYPE, sizeof(PROTOCOL_LIST_GAMES_TYPE));
+    strncpy(response.type, PROTOCOL_CREATE_GAME_TYPE, sizeof(PROTOCOL_CREATE_GAME_TYPE));
     response.gameID = gameID;
     response.playerID = playerID;
     strncpy(response.playerPassword, games[gameID].player[playerID].password, PROTOCOL_MAX_PASSWORD_LENGTH);
+    memcpy(sendBuff, &response, sendBuffSize);
+
+    return 1;
+}
+
+int routeJoinGame(int connfd, char * recvBuff, size_t sendBuffSize, unsigned char * sendBuff)
+{
+    int canSend = sizeof(ProtocolJoinGameResponse) <= sendBuffSize;
+    if (!canSend) {
+        return 0;
+    }
+
+    // Parse request
+    ProtocolJoinGameRequest * request = (ProtocolJoinGameRequest *) recvBuff;
+
+    int playerID = joinGame(request->gameID, request->playerName, connfd);
+    if (playerID == -1) {
+        return 0;
+    }
+
+    // Generate response
+    ProtocolJoinGameResponse response;
+    strncpy(response.type, PROTOCOL_JOIN_GAME_TYPE, sizeof(PROTOCOL_JOIN_GAME_TYPE));
+    response.playerID = playerID;
+    strncpy(response.playerPassword, games[request->gameID].player[playerID].password, PROTOCOL_MAX_PASSWORD_LENGTH);
     memcpy(sendBuff, &response, sendBuffSize);
 
     return 1;

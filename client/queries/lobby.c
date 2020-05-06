@@ -3,6 +3,8 @@
 #include "../../common/protocol/protocol_messages.h"
 #include "../../common/networking/fetch.h"
 #include "../const.h"
+#include <errno.h>
+#include <sys/socket.h>
 
 int getFieldCount(ProtocolListFieldsResponse * buff) {
     int success = 1;
@@ -123,6 +125,49 @@ int createGame(ProtocolCreateGameResponse * buff, char * gameName, char * player
     }
 }
 
+int joinGame(ProtocolJoinGameResponse * buff, int gameID, char * playerName)
+{
+    int success = 1;
+
+    // Use connection from global client state
+    int connectionfd = server.fd;
+
+    // Generate request
+    ProtocolJoinGameRequest request;
+    strncpy(request.type, PROTOCOL_JOIN_GAME_TYPE, sizeof(PROTOCOL_JOIN_GAME_TYPE));
+    strncpy(request.playerName, playerName, sizeof(PROTOCOL_MAX_PLAYER_NAME));
+
+    request.gameID = gameID;
+
+    // Send request
+    unsigned char * recvBuff = fetch(connectionfd, &request, sizeof(ProtocolJoinGameRequest));
+    if (!recvBuff) {
+        if (DEBUG) printf("[joingame] Join game request failed\n");
+        success = 0;
+        return success;
+    }
+
+    // Process response
+    printf("[joingame] Received: %s\n", getVolatilePrintableResponseType(recvBuff));
+    fflush(stdout);
+    if (isMessageType(recvBuff, PROTOCOL_JOIN_GAME_TYPE)) {
+        // Request success
+        memcpy(buff, recvBuff, sizeof(ProtocolJoinGameResponse));
+        return success;
+    } else {
+        // Request error
+        if (isMessageType(recvBuff, PROTOCOL_ERROR_TYPE)) {
+            ProtocolErrorResponse * error = (ProtocolErrorResponse *) recvBuff;
+            if (DEBUG) printf("[joingame] Join game failed w/ error: %s\n", getVolatileErrorMessage(error->errorCode));
+        } else {
+            if (DEBUG) printf("[joingame] Join game failed w/ unknown error\n");
+        }
+
+        success = 0;
+        return success;
+    }
+}
+
 int startGame(ProtocolStartGameResponse * buff, int gameID, char * playerPassword) {
     int success = 1;
 
@@ -154,12 +199,47 @@ int startGame(ProtocolStartGameResponse * buff, int gameID, char * playerPasswor
         // Request error
         if (isMessageType(recvBuff, PROTOCOL_ERROR_TYPE)) {
             ProtocolErrorResponse * error = (ProtocolErrorResponse *) recvBuff;
-            if (DEBUG) printf("[startgame] List games failed w/ error: %s\n", getVolatileErrorMessage(error->errorCode));
+            if (DEBUG) printf("[startgame] Start game failed w/ error: %s\n", getVolatileErrorMessage(error->errorCode));
         } else {
-            if (DEBUG) printf("[startgame] List games failed w/ unknown error\n");
+            if (DEBUG) printf("[startgame] Start game failed w/ unknown error\n");
         }
 
         success = 0;
         return success;
     }
+}
+
+int waitForStart(ProtocolStartGameResponse * buff) {
+    errno = 0;
+
+    // Use connection from global client state
+    int connectionfd = server.fd;
+   
+        // Receive incoming message
+        unsigned char * recvBuff = receiveMessage(connectionfd, MSG_DONTWAIT); // TODO: NOT SURE IF BAD
+        if (!recvBuff) {
+            if (errno == EWOULDBLOCK || errno == EAGAIN) {
+                // No message to receive in queue
+                // Or socket temporarily unavailable
+                // Regardless - just try later
+                return 0;
+            } else {
+                // Failed to receive message
+                printf("[waiting] Receiving game start request failed: [%d] %s\n", errno, strerror(errno));
+            }
+        }
+
+        if (isMessageType(recvBuff, "\0\0")) {
+            // Skip empty messages
+            return 0;
+        }
+
+        // Parse request
+        unsigned char sendBuff[SEND_BUFF_SIZE];
+        if (isMessageType(recvBuff, PROTOCOL_START_GAME_TYPE)) {
+            unserializeProtocolStartGameResponse(recvBuff, RECV_BUFF_SIZE, buff);
+            return 1;
+        }
+
+    return 0;
 }

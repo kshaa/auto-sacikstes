@@ -111,6 +111,10 @@ char PROTOCOL_CREATE_GAME_TYPE[] = { 'C', 'G' };
 
 // Start game
 char PROTOCOL_START_GAME_TYPE[] = { 'S', 'G' };
+
+// Join game
+char PROTOCOL_JOIN_GAME_TYPE[] = { 'J', 'G' };
+
 void unserializeProtocolStartGameResponse(unsigned char * buff, size_t buffSize, ProtocolStartGameResponse * response) {
     // Check if the buff is way too small
     if (buffSize < sizeof(ProtocolStartGameResponse)) {
@@ -156,7 +160,7 @@ void serializeProtocolStartGameResponse(ProtocolStartGameResponse * response, un
     // Serialize playerInfos & field
     for (int i = 0; i < response->playerInfoCount; i++) {
         unsigned char * playerInfosOffset = buff + sizeof(char) * 2 + sizeof(int);
-        unsigned char * nthPlayerInfoOffset = playerInfosOffset + i;
+        unsigned char * nthPlayerInfoOffset = playerInfosOffset + i * sizeof(ProtocolPlayerInfo);
         memcpy(nthPlayerInfoOffset, &response->playerInfos[i], sizeof(ProtocolPlayerInfo));
     }
     // Serialize field info

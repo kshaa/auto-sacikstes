@@ -75,6 +75,9 @@ void resizeScene() {
     for (int i = 0; i < scene.wallCount; i++) {
         retransformWall(&scene.walls[i]);
     }
+    for (int i = 0; i < scene.carsCount; i++) {
+        retransformWall(&scene.cars[i]);
+    }
 }
 
 void initScene() {

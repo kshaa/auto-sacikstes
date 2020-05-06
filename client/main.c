@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <time.h>
 #include "const.h"
 #include "init.h"
 #include "input.h"
@@ -312,7 +313,78 @@ int main(int argc, char *argv[]) {
         // Start the game
         runGame();
     } else if (joinGameFlag) {
+        // Join game
         printf("[client] Joining game w/ ID: %d\n", inputGameID);
+
+        ProtocolJoinGameResponse joinGameResponse;
+        int joinGameSuccess = joinGame(&joinGameResponse, inputGameID, inputPlayerName);
+        if (!joinGameSuccess) {
+            fprintf(stderr, "[client] Failed to join game\n");
+            return 1;
+        }
+
+        // Debug sent lines
+        if (DEBUG) {
+            printf(
+                "[client] Joined game! Game ID: %d, player ID: %d, player password: %s\n",
+                inputGameID,
+                joinGameResponse.playerID,
+                joinGameResponse.playerPassword
+            );
+        }
+
+        // Wait for game to start
+        ProtocolStartGameResponse startGameResponse;
+        startGameResponse.playerInfos = malloc(sizeof(ProtocolPlayerInfo) * MAX_GAME_PLAYERS);
+        int startSuccess = 0;
+        while (!startSuccess) {
+            startSuccess = waitForStart(&startGameResponse);
+
+            // Sleep a little, to avoid making CPU sad
+            struct timespec timeout;
+            timeout.tv_sec = 0;
+            timeout.tv_nsec = 1; // 0.01 ms
+            nanosleep(&timeout, NULL);
+        }
+       
+        printf("[client] Starting game!\n");
+        // Debug sent lines
+        if (DEBUG) {
+            printf(
+                "[client] Player count: %d, Field ID: %d, field width: %d, field height: %d\n",
+                startGameResponse.playerInfoCount,
+                startGameResponse.field.id,
+                startGameResponse.field.width,
+                startGameResponse.field.height
+            );
+            printf("[client] Field start line: ");
+            printLine(&startGameResponse.startLine);
+            printf("\n");
+            for (int i = 0; i < startGameResponse.extraLineCount; i++) {
+                printf("[client] Field extra line: ");
+                printLine(&startGameResponse.extraLines[i]);
+                printf("\n");
+            }
+        }
+
+        // Store game info globally
+        game.info.status = STARTED;
+
+        // Store field in global storage
+        memcpy(&game.field.info, &startGameResponse.field, sizeof(ProtocolFieldInfo));
+        memcpy(&game.field.startLine, &startGameResponse.startLine, sizeof(ProtocolLine));
+        game.field.extraLinesCount = startGameResponse.extraLineCount;
+        game.field.extraLines = malloc(sizeof(ProtocolLine) * game.field.extraLinesCount);
+        for (int i = 0; i < game.field.extraLinesCount; i++) {
+            memcpy(&game.field.extraLines[i], &startGameResponse.extraLines[i], sizeof(ProtocolLine));
+        }
+
+        // Store players in global storage
+        for (int i = 0; i < startGameResponse.playerInfoCount; i++) {
+            game.player[i].created = 1;
+            memcpy(&game.player[i].info, &startGameResponse.playerInfos[i], sizeof(ProtocolPlayerInfo));
+        }
+
         runGame();
     }
 
