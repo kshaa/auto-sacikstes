@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
         // Handle traffic
         int handleTrafficSuccess;
         handleTrafficSuccess = handleConnectionTraffic();
-        // handleTrafficSuccess = handleTrafficSuccess && handleConnectionlessTraffic();
+        handleTrafficSuccess = handleTrafficSuccess && handleConnectionlessTraffic();
         if (!handleTrafficSuccess) {
             fprintf(stderr, "[server] Failed to handle traffic\n");
         }

@@ -1,6 +1,7 @@
 #include <string.h>
 #include "../common/networking/fetch.h"
 #include "../common/networking/translate.h"
+#include <sys/socket.h>
 #include "networking/socket.h"
 #include "const.h"
 #include "state.h"
@@ -31,15 +32,23 @@ int initState() {
 
 int initConnection() {
     printf("[state] Server connection defined as %s:%d\n", server.addressSerialized, server.port);
-    int connectionfd = connectTCP(server.address, server.port);
+    int connectionfd = initClientSocket(server.address, server.port, SOCK_STREAM);
     if (connectionfd == -1) {
-        printf("[state] Failed to connect to server\n");
+        printf("[state] Failed to create TCP socket and/or a connection to server\n");
         return 0;
     } else {
-        printf("[state] Connected to server, fd: %d\n", connectionfd);
+        printf("[state] Created TCP socket and connected to server, fd: %d\n", connectionfd);
         server.fd = connectionfd;
-        return 1;
     }
+    int connectionfdUDP = initClientSocket(server.address, server.port, SOCK_DGRAM);
+    if (connectionfdUDP == -1) {
+        printf("[state] Failed to create UDP socket for server communications\n");
+        return 0;
+    } else {
+        printf("[state] Created UDP socket for server communications, fd: %d\n", connectionfdUDP);
+        server.fdUDP = connectionfdUDP;
+    }
+    return 1;
 }
 
 int getGamePlayerCount() {

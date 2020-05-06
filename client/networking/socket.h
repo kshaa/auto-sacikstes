@@ -12,6 +12,6 @@ extern char sendBuff[SEND_BUFF_SIZE];
 extern char recvBuff[RECV_BUFF_SIZE];
 
 // Socket management
-int connectTCP(uint32_t address, int port);
+int initClientSocket(uint32_t address, int port, int type);
 
 #endif

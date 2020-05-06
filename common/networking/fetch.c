@@ -4,6 +4,15 @@
 #include <stdio.h>
 #include <string.h>
 
+// Generate address struct
+struct sockaddr_in volatileServerAddress;
+struct sockaddr_in * getVolatileAddress(int address, int port) {
+    memset(&volatileServerAddress, 0, sizeof(volatileServerAddress));
+    volatileServerAddress.sin_family = AF_INET;
+    volatileServerAddress.sin_addr.s_addr = htonl(address);
+    volatileServerAddress.sin_port = htons(port);
+} 
+
 // Network buffers
 unsigned char sendBuff[COMMON_SEND_BUFF_SIZE];
 unsigned char recvBuff[COMMON_SEND_BUFF_SIZE];
@@ -36,6 +45,24 @@ int sendMessage(int connectionfd, void * buff, size_t buffSize, int flags) {
     return 1;
 }
 
+int sendMessageTo(int connectionfd, void * buff, size_t buffSize, int flags, struct sockaddr * addr, socklen_t addrSize) {
+    // Load message
+    int loadSuccess = loadSendBuff(buff, buffSize);
+    if (!loadSuccess) {
+        if (COMMON_VERBOSE) fprintf(stderr, "[network] Network request preparation (loadSendBuff) failed.\n");
+        return 0;
+    }
+
+    // Send message
+    int sendResult = sendto(connectionfd, &sendBuff, sizeof(sendBuff), flags, addr, addrSize);
+    if (sendResult == -1) {
+        if (COMMON_VERBOSE) fprintf(stderr, "[network] Network message sending (sendto) failed: [%d] %s.\n", errno, strerror(errno));
+        return 0;
+    }
+
+    return 1;
+}
+
 unsigned char * receiveMessage(int connectionfd, int flags) {
     memset(recvBuff, 0, sizeof(recvBuff));
     int recvResult = recv(connectionfd, recvBuff, sizeof(recvBuff), flags);
@@ -47,6 +74,18 @@ unsigned char * receiveMessage(int connectionfd, int flags) {
     return recvBuff;
 }
 
+unsigned char * receiveMessageFrom(int connectionfd, int flags, struct sockaddr * addr, size_t addrSize) {
+    memset(recvBuff, 0, sizeof(recvBuff));
+    int recvResult = recvfrom(connectionfd, recvBuff, sizeof(recvBuff), flags, addr, (int *)&addrSize);
+    if (recvResult == -1) {
+        if (COMMON_VERBOSE) fprintf(stderr, "[network] Network message receiving (recvfrom) failed: [%d] %s.\n", errno, strerror(errno));
+        return NULL;
+    }
+
+    return recvBuff;
+}
+
+// Network helpers
 unsigned char * fetch(int connectionfd, void * buff, size_t buffSize) {
     // Send message
     int sendSuccess = sendMessage(connectionfd, buff, buffSize, 0);

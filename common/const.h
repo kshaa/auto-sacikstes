@@ -2,7 +2,7 @@
 #define COMMON_CONST_H
 
 // Debug modes
-#define COMMON_VERBOSE 0
+#define COMMON_VERBOSE 1
 #define COMMON_DEBUG 1
 
 // Default buffer sizes
