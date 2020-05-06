@@ -3,6 +3,7 @@
 #include "../state.h"
 #include "../const.h"
 #include <time.h>
+#include <netinet/in.h>
 
 int ping() {
     int success = 1;
@@ -11,6 +12,7 @@ int ping() {
     // Use connection from global client state
     int connectionfd = server.fd;
     int connectionfdUDP = server.fdUDP;
+    printf("%d", connectionfdUDP);
 
     // Generate request
     ProtocolPingRequest request;
@@ -24,20 +26,26 @@ int ping() {
     }
 
     // Fetch ping response using UDP
-    struct sockaddr_in * serverAddress = getVolatileAddress(server.address, server.port); 
-    socklen_t addressLength = sizeof(struct sockaddr_in *);
-    int sendSuccess = sendMessageTo(connectionfdUDP, &request, sizeof(ProtocolPingRequest), 0, (struct sockaddr *) serverAddress, addressLength);
+    // struct sockaddr_in * serverAddress = getVolatileAddress(server.address, server.port); 
+    struct sockaddr_in serverAddress;
+    memset(&serverAddress, 0, sizeof(serverAddress));
+    serverAddress.sin_family = AF_INET;
+    serverAddress.sin_addr.s_addr = htonl(server.address);
+    serverAddress.sin_port = htons(server.port);
+    
+    int sendSuccess = sendMessageTo(connectionfdUDP, &request, sizeof(ProtocolPingRequest), MSG_DONTWAIT, (struct sockaddr *) &serverAddress, sizeof(struct sockaddr_in));
     if (!sendSuccess) {
         printf("AAA");
         success = 0;
         return success;
     }
+        printf("BBB");
 
     int startSuccess = 0;
     int timeoutClicker = 0;
     int timeoutClickerMax = 100;
     while (!startSuccess) {
-        recvBuff = receiveMessageFrom(connectionfdUDP, 0, (struct sockaddr *) serverAddress, sizeof(serverAddress));
+        recvBuff = receiveMessageFrom(connectionfdUDP, 0, (struct sockaddr *) &serverAddress, sizeof(serverAddress));
         if (!recvBuff) {
             startSuccess = 0;
         }
@@ -47,6 +55,9 @@ int ping() {
         timeout.tv_sec = 0;
         timeout.tv_nsec = 1; // 0.01 ms
         nanosleep(&timeout, NULL);
+        timeoutClicker++;
+    printf("%d", timeoutClicker);
+
 
         // Timeout after a while
         if (timeoutClicker > timeoutClickerMax) {

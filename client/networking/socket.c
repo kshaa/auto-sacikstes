@@ -23,15 +23,9 @@ int initClientSocket(uint32_t address, int port, int type) {
         return failurefd;
     }
 
-    // Build server listening address
-    struct sockaddr_in serv_addr; 
-    memset(&serv_addr, 0, sizeof(serv_addr));
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = htonl(address);
-    serv_addr.sin_port = htons(port); 
-
     // Create, and connect to a socket
-    int serverfd = socket(AF_INET, type, 0);
+    int flags = type == SOCK_DGRAM ? IPPROTO_UDP : 0;
+    int serverfd = socket(AF_INET, type, flags);
     if (serverfd == -1) {
         fprintf(stderr, "[socket] Couldn't create socket for server connection: %s\n", strerror(errno));
         return failurefd;
@@ -40,6 +34,14 @@ int initClientSocket(uint32_t address, int port, int type) {
     // Only TCP requires an actual connection establishment
     // UDP is too cool for reliability
     if (type == SOCK_STREAM) {
+        // Build server listening address
+        struct sockaddr_in serv_addr; 
+        memset(&serv_addr, 0, sizeof(serv_addr));
+        serv_addr.sin_family = AF_INET;
+        serv_addr.sin_addr.s_addr = htonl(address);
+        serv_addr.sin_port = htons(port); 
+
+        // Create a connection
         int connectResult = connect(serverfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)); 
         if (connectResult == -1) {
             fprintf(stderr, "[socket] Couldn't connect to server: %s\n", strerror(errno));

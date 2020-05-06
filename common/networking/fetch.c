@@ -11,6 +11,7 @@ struct sockaddr_in * getVolatileAddress(int address, int port) {
     volatileServerAddress.sin_family = AF_INET;
     volatileServerAddress.sin_addr.s_addr = htonl(address);
     volatileServerAddress.sin_port = htons(port);
+    return &volatileServerAddress;
 } 
 
 // Network buffers

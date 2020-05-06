@@ -98,7 +98,11 @@ int routeTraffic(int connectionfd) {
 
                 if (!sendSuccess) {
                     success = 0;
-                    fprintf(stderr, "[router] Sending response failed for connection %d\n", connectionfd);
+                    if (errno == 0) {
+                        fprintf(stderr, "[router] Sending response failed for connection %d\n", connectionfd);
+                    } else {
+                        fprintf(stderr, "[router] Sending response failed for connection %d: %s\n", connectionfd, strerror(errno));
+                    }
                 }
             }
         }
