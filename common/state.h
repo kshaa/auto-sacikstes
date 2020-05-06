@@ -10,6 +10,7 @@ typedef struct {
     int address;
     int port;
     int fd;
+    int fdUDP;
 } Server;
 
 // Field

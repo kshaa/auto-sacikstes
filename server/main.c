@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
     // Initialize socket
     int initConnectionSuccess = initConnection();
     if (!initConnectionSuccess) {
-        fprintf(stderr, "[server] Failed to initialize server socket\n");
+        fprintf(stderr, "[server] Failed to initialize server sockets\n");
         return 1;
     }
 
@@ -90,7 +90,9 @@ int main(int argc, char *argv[])
         acceptConnections();
 
         // Handle traffic
-        int handleTrafficSuccess = handleTraffic();
+        int handleTrafficSuccess;
+        handleTrafficSuccess = handleConnectionTraffic();
+        // handleTrafficSuccess = handleTrafficSuccess && handleConnectionlessTraffic();
         if (!handleTrafficSuccess) {
             fprintf(stderr, "[server] Failed to handle traffic\n");
         }

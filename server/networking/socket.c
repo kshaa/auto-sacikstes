@@ -13,11 +13,17 @@
 
 // Socket connections
 int serverfd = CLOSED_CONNECTION;
+int serverfdUDP = CLOSED_CONNECTION;
 int connectionCount = 0;
 int connectionfds[MAX_CONNECTIONS];
 
-int listenTCP(uint32_t address, int port) {
+int initServerSocket(uint32_t address, int port, int type) {
     int failurefd = -1;
+
+    if (!(type == SOCK_STREAM || type == SOCK_DGRAM)) {
+        fprintf(stderr, "[socket] Trying to create a socket of type I wasn't built for [%d]\n", type);
+        return failurefd;
+    }
 
     // Build server listening address
     struct sockaddr_in serv_addr; 
@@ -27,7 +33,7 @@ int listenTCP(uint32_t address, int port) {
     serv_addr.sin_port = htons(port); 
 
     // Create, bind and listen to a socket
-    int listenfd = socket(AF_INET, SOCK_STREAM, 0);
+    int listenfd = socket(AF_INET, type, 0);
     if (listenfd == -1) {
         fprintf(stderr, "[socket] Couldn't create socket: %s\n", strerror(errno));
         return failurefd;
@@ -37,10 +43,13 @@ int listenTCP(uint32_t address, int port) {
         fprintf(stderr, "[socket] Couldn't bind socket: %s\n", strerror(errno));
         return failurefd;
     }
-    int listenResult = listen(listenfd, MAX_PENDING_CONNECTIONS);
-    if (listenResult == -1) {
-        fprintf(stderr, "[socket] Couldn't listen to socket: %s\n", strerror(errno));
-        return failurefd;
+    // TCP streams require listen for accepting connections later
+    if (type == SOCK_STREAM) {
+        int listenResult = listen(listenfd, MAX_PENDING_CONNECTIONS);
+        if (listenResult == -1) {
+            fprintf(stderr, "[socket] Couldn't listen to socket: %s\n", strerror(errno));
+            return failurefd;
+        }
     }
 
     // Set socket as non-blocking

@@ -115,7 +115,7 @@ int routeTraffic(int connectionfd) {
     return success;
 }
 
-int handleTraffic() {
+int handleConnectionTraffic() {
     int success = 1;
 
     // Handle traffic for every connection
@@ -135,6 +135,12 @@ int handleTraffic() {
             success = 1; // A broken connection isn't a server fault really.
         }
     }; 
+
+    return success;
+}
+
+int handleConnectionlessTraffic() {
+    int success = routeTraffic(serverfdUDP);
 
     return success;
 }

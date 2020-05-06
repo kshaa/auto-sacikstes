@@ -1,6 +1,7 @@
 #include <string.h>
 #include "../common/networking/fetch.h"
 #include "../common/networking/translate.h"
+#include <sys/socket.h>
 #include "networking/socket.h"
 #include "const.h"
 #include "state.h"
@@ -15,6 +16,7 @@ int initState() {
     server.address = translateIPAddress(server.addressSerialized);
     server.port = COMMON_DEFAULT_SERVER_PORT;
     server.fd = -1;
+    server.fdUDP = -1;
 
     // Prepare games
     memset(&games, 0, sizeof(games));
@@ -27,15 +29,25 @@ int initState() {
 
 int initConnection() {
     printf("[state] Server socket defined as %s:%d\n", server.addressSerialized, server.port);
-    serverfd = listenTCP(server.address, server.port);
+    printf("[state] Initialising TCP socket\n");
+    serverfd = initServerSocket(server.address, server.port, SOCK_STREAM);
     if (serverfd == -1) {
-        fprintf(stderr, "[state] Failed to create server socket\n");
+        fprintf(stderr, "[state] Failed to create server TCP socket\n");
         return 0;
     } else {
-        if (DEBUG) printf("[state] Server socket is listening, fd: %d\n", serverfd);
+        if (DEBUG) printf("[state] Server TCP socket is listening, fd: %d\n", serverfd);
         server.fd = serverfd;
-        return 1;
     }
+    printf("[state] Initialising UDP socket\n");
+    serverfdUDP = initServerSocket(server.address, server.port, SOCK_DGRAM);
+    if (serverfdUDP == -1) {
+        fprintf(stderr, "[state] Failed to create server UDP socket\n");
+        return 0;
+    } else {
+        if (DEBUG) printf("[state] Server UDP socket is listening, fd: %d\n", serverfdUDP);
+        server.fdUDP = serverfdUDP;
+    }
+    return 1;
 }
 
 int getGameCount() {
