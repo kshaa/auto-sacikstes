@@ -91,3 +91,13 @@ $ tree
 ![Start client and server](start.png)  
   
 ![Play game](play.png)  
+
+## Notes
+Actual gameplay wasn't implemented because of limited time for development.  
+To finish the project, the following functionality would be required:  
+- UDP connectivity between client & server
+- Sending controls from client to server
+- Primitive physics engine in server
+- Scheduled, broadcasted game state updates
+- Winning player detection & broadcasting
+
